@@ -1,4 +1,467 @@
-<div class="container">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión Ganadera</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f6fa;
+            color: #2c3e50;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            padding: 30px 20px;
+            background: #34495e;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            font-size: 13px;
+            color: #95a5a6;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            width: 24px;
+        }
+
+        .nav-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f5f6fa;
+        }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #e1e8ed;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* TABLE */
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e1e8ed;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 20px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .card-body {
+            padding: 0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #95a5a6;
+            background: none;
+            border: none;
+        }
+
+        .close:hover {
+            color: #e74c3c;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dfe4ea;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        /* ALERT */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* CONTENT SECTIONS */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* STATUS INDICATOR */
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: #27ae60;
+        }
+
+        .status-inactive {
+            background: #95a5a6;
+        }
+
+        .status-warning {
+            background: #f39c12;
+        }
+
+        /* BADGE */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-primary {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .badge-warning {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .badge-danger {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .nav-text, .logo p {
+                display: none;
+            }
+
+            .logo h1 {
+                font-size: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+        <div class="container">
         <!-- SIDEBAR -->
         <div class="sidebar">
             <div class="logo">
@@ -270,3 +733,734 @@
             </div>
         </div>
     </div>
+
+        <!-- MODAL ANIMAL -->
+    <div id="animal-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agregar Animal</h3>
+                <button class="close" onclick="closeModal('animal-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="animal-form" onsubmit="agregarAnimal(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Caravana *</label>
+                            <input type="text" id="caravana" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Raza *</label>
+                            <input type="text" id="raza" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Sexo *</label>
+                            <select id="sexo" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Macho">Macho</option>
+                                <option value="Hembra">Hembra</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Nacimiento *</label>
+                            <input type="date" id="fechaNacimiento" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Peso (kg)</label>
+                            <input type="number" id="peso" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Parcela *</label>
+                            <select id="parcela-animal" required>
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Estado *</label>
+                            <select id="estado" required>
+                                <option value="Activo">Activo</option>
+                                <option value="Vendido">Vendido</option>
+                                <option value="Muerto">Muerto</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <textarea id="observaciones" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Animal</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARCELA -->
+    <div id="parcela-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agregar Parcela</h3>
+                <button class="close" onclick="closeModal('parcela-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="parcela-form" onsubmit="agregarParcela(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre *</label>
+                            <input type="text" id="nombre-parcela" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Hectáreas *</label>
+                            <input type="number" id="hectareas" step="0.1" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo de Pasto *</label>
+                            <input type="text" id="tipoPasto" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Capacidad (cabezas) *</label>
+                            <input type="number" id="capacidad" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado *</label>
+                        <select id="estado-parcela" required>
+                            <option value="Disponible">Disponible</option>
+                            <option value="Ocupada">Ocupada</option>
+                            <option value="Descanso">Descanso</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Parcela</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONTROL SANITARIO -->
+    <div id="control-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nuevo Control Sanitario</h3>
+                <button class="close" onclick="closeModal('control-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="control-form" onsubmit="agregarControl(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha *</label>
+                            <input type="date" id="fecha-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Caravana *</label>
+                            <select id="caravana-control" required>
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo de Control *</label>
+                            <select id="tipo-control" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Vacunación">Vacunación</option>
+                                <option value="Desparasitación">Desparasitación</option>
+                                <option value="Revisión Veterinaria">Revisión Veterinaria</option>
+                                <option value="Tratamiento">Tratamiento</option>
+                                <option value="Tacto">Tacto/Diagnóstico Preñez</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Producto/Vacuna</label>
+                            <input type="text" id="producto-control">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Dosis</label>
+                            <input type="text" id="dosis-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Veterinario</label>
+                            <input type="text" id="veterinario-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Próximo Control</label>
+                        <input type="date" id="proximo-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <textarea id="observaciones-control" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Control</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PESADA -->
+    <div id="pesada-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Pesada</h3>
+                <button class="close" onclick="closeModal('pesada-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="pesada-form" onsubmit="agregarPesada(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha *</label>
+                            <input type="date" id="fecha-pesada" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Caravana *</label>
+                            <select id="caravana-pesada" required>
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Peso (kg) *</label>
+                        <input type="number" id="peso-pesada" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <textarea id="observaciones-pesada" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Pesada</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MOVIMIENTO -->
+    <div id="movimiento-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nuevo Movimiento</h3>
+                <button class="close" onclick="closeModal('movimiento-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="movimiento-form" onsubmit="agregarMovimiento(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha *</label>
+                            <input type="date" id="fecha-movimiento" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Movimiento *</label>
+                            <select id="tipo-movimiento" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Compra">Compra</option>
+                                <option value="Venta">Venta</option>
+                                <option value="Nacimiento">Nacimiento</option>
+                                <option value="Muerte">Muerte</option>
+                                <option value="Traslado">Traslado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Caravana *</label>
+                        <input type="text" id="caravana-movimiento" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Detalles</label>
+                        <input type="text" id="detalles-movimiento" placeholder="Ej: Comprador, peso de venta, madre, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <textarea id="observaciones-movimiento" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Movimiento</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL INVENTARIO -->
+    <div id="inventario-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agregar Item de Inventario</h3>
+                <button class="close" onclick="closeModal('inventario-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="inventario-form" onsubmit="agregarInventario(event)">
+                    <div class="form-group">
+                        <label>Item *</label>
+                        <input type="text" id="item-nombre" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cantidad *</label>
+                            <input type="number" id="cantidad-item" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio Unitario *</label>
+                            <input type="number" id="precio-unitario" step="0.01" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Item</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+        <script>
+        // API URL - YA CONFIGURADA CON TU URL
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzuihykZzsLTjBzDI1zSEeYGv8fEnFIVL5oktzkqTyJVtkBQLjb6NCcHTe_OyyPWS0Kug/exec';
+        
+        let animales = [];
+        let parcelas = [];
+        let inventario = [];
+        let controles = [];
+        let pesadas = [];
+        let movimientos = [];
+
+        // Cargar datos al iniciar
+        window.addEventListener('load', function() {
+            cargarDatos();
+            // Establecer fecha de hoy por defecto en formularios
+            document.getElementById('fecha-control').valueAsDate = new Date();
+            document.getElementById('fecha-pesada').valueAsDate = new Date();
+            document.getElementById('fecha-movimiento').valueAsDate = new Date();
+        });
+
+        async function cargarDatos() {
+            try {
+                const [animalesData, parcelasData, inventarioData, controlesData, pesadasData, movimientosData] = await Promise.all([
+                    fetch(`${API_URL}?sheet=Animales`).then(r => r.json()),
+                    fetch(`${API_URL}?sheet=Parcelas`).then(r => r.json()),
+                    fetch(`${API_URL}?sheet=Inventario`).then(r => r.json()),
+                    fetch(`${API_URL}?sheet=Controles`).then(r => r.json()),
+                    fetch(`${API_URL}?sheet=Pesadas`).then(r => r.json()),
+                    fetch(`${API_URL}?sheet=Movimientos`).then(r => r.json())
+                ]);
+
+                animales = animalesData;
+                parcelas = parcelasData;
+                inventario = inventarioData;
+                controles = controlesData;
+                pesadas = pesadasData;
+                movimientos = movimientosData;
+
+                actualizarTodo();
+                showAlert(`✓ Datos actualizados: ${animales.length} animales cargados`, 'success');
+            } catch (error) {
+                console.error(error);
+                showAlert('✗ Error al cargar datos: ' + error.message, 'error');
+            }
+        }
+
+        async function guardarEnAPI(sheet, data) {
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sheet, action: 'add', data })
+                });
+                return true;
+            } catch (error) {
+                console.error(error);
+                return false;
+            }
+        }
+
+        function actualizarTodo() {
+            actualizarDashboard();
+            actualizarTablaAnimales();
+            actualizarTablaParcelas();
+            actualizarTablaControles();
+            actualizarTablaPesadas();
+            actualizarTablaMovimientos();
+            actualizarTablaInventario();
+            actualizarSelectores();
+        }
+
+        function actualizarDashboard() {
+            // Stats principales
+            document.getElementById('total-animales').textContent = animales.length;
+            document.getElementById('total-parcelas').textContent = parcelas.length;
+
+            // Peso promedio
+            const animalesConPeso = animales.filter(a => a.peso && a.peso !== '');
+            const pesoPromedio = animalesConPeso.length > 0 ?
+                (animalesConPeso.reduce((sum, a) => sum + parseFloat(a.peso), 0) / animalesConPeso.length).toFixed(1) : 0;
+            document.getElementById('peso-promedio').textContent = pesoPromedio;
+
+            // Controles este mes
+            const hoy = new Date();
+            const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            const controlesEsteMes = controles.filter(c => {
+                const fechaControl = new Date(c.fecha);
+                return fechaControl >= primerDiaMes;
+            }).length;
+            document.getElementById('total-controles-mes').textContent = controlesEsteMes;
+
+            // Resumen por sexo
+            const machos = animales.filter(a => a.sexo === 'Macho').length;
+            const hembras = animales.filter(a => a.sexo === 'Hembra').length;
+            document.getElementById('total-machos').textContent = machos;
+            document.getElementById('total-hembras').textContent = hembras;
+            document.getElementById('pct-machos').textContent = animales.length > 0 ? ((machos/animales.length)*100).toFixed(1) + '%' : '0%';
+            document.getElementById('pct-hembras').textContent = animales.length > 0 ? ((hembras/animales.length)*100).toFixed(1) + '%' : '0%';
+
+            // Últimos movimientos
+            const tbody = document.getElementById('ultimos-movimientos');
+            tbody.innerHTML = '';
+            const ultimosMovimientos = movimientos.slice(-5).reverse();
+            ultimosMovimientos.forEach(mov => {
+                const row = tbody.insertRow();
+                const fecha = mov.fecha ? new Date(mov.fecha).toLocaleDateString('es-AR') : '';
+                row.innerHTML = `
+                    <td>${fecha}</td>
+                    <td><span class="badge badge-primary">${mov.tipoMovimiento}</span></td>
+                    <td><strong>${mov.caravana}</strong></td>
+                    <td>${mov.detalles || '-'}</td>
+                `;
+            });
+        }
+
+        function actualizarTablaAnimales() {
+            const tbody = document.getElementById('animales-tbody');
+            tbody.innerHTML = '';
+            animales.forEach(animal => {
+                const row = tbody.insertRow();
+                const fecha = animal.fechaNacimiento ? new Date(animal.fechaNacimiento).toLocaleDateString('es-AR') : '';
+                const peso = animal.peso || '-';
+                const statusClass = animal.estado === 'Activo' ? 'status-active' : 'status-inactive';
+                row.innerHTML = `
+                    <td>${animal.id}</td>
+                    <td><strong>${animal.caravana}</strong></td>
+                    <td>${animal.raza}</td>
+                    <td>${animal.sexo}</td>
+                    <td>${fecha}</td>
+                    <td>${peso}</td>
+                    <td>${animal.parcela}</td>
+                    <td><span class="status-indicator ${statusClass}"></span>${animal.estado}</td>
+                `;
+            });
+        }
+
+        function actualizarTablaParcelas() {
+            const tbody = document.getElementById('parcelas-tbody');
+            tbody.innerHTML = '';
+            parcelas.forEach(parcela => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${parcela.id}</td>
+                    <td><strong>${parcela.nombre}</strong></td>
+                    <td>${parcela.hectareas} ha</td>
+                    <td>${parcela.tipoPasto || '-'}</td>
+                    <td>${parcela.capacidad}</td>
+                    <td>${parcela.estado || '-'}</td>
+                `;
+            });
+        }
+
+        function actualizarTablaControles() {
+            const tbody = document.getElementById('controles-tbody');
+            tbody.innerHTML = '';
+            controles.forEach(control => {
+                const row = tbody.insertRow();
+                const fecha = control.fecha ? new Date(control.fecha).toLocaleDateString('es-AR') : '';
+                const proximoControl = control.proximoControl ? new Date(control.proximoControl).toLocaleDateString('es-AR') : '-';
+                row.innerHTML = `
+                    <td>${fecha}</td>
+                    <td><strong>${control.caravana}</strong></td>
+                    <td><span class="badge badge-primary">${control.tipoControl}</span></td>
+                    <td>${control.producto || '-'}</td>
+                    <td>${control.veterinario || '-'}</td>
+                    <td>${proximoControl}</td>
+                `;
+            });
+        }
+
+        function actualizarTablaPesadas() {
+            const tbody = document.getElementById('pesadas-tbody');
+            tbody.innerHTML = '';
+            
+            // Agrupar pesadas por caravana
+            const pesadasPorCaravana = {};
+            pesadas.forEach(pesada => {
+                if (!pesadasPorCaravana[pesada.caravana]) {
+                    pesadasPorCaravana[pesada.caravana] = [];
+                }
+                pesadasPorCaravana[pesada.caravana].push(pesada);
+            });
+
+            // Ordenar pesadas por fecha
+            pesadas.forEach(pesada => {
+                const row = tbody.insertRow();
+                const fecha = pesada.fecha ? new Date(pesada.fecha).toLocaleDateString('es-AR') : '';
+                
+                // Calcular ganancia desde última pesada
+                const pesadasAnimal = pesadasPorCaravana[pesada.caravana] || [];
+                const pesadasOrdenadas = pesadasAnimal.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                const indexActual = pesadasOrdenadas.findIndex(p => p.id === pesada.id);
+                
+                let ganancia = '-';
+                if (indexActual > 0) {
+                    const pesoActual = parseFloat(pesada.peso);
+                    const pesoAnterior = parseFloat(pesadasOrdenadas[indexActual - 1].peso);
+                    const diff = pesoActual - pesoAnterior;
+                    ganancia = diff > 0 ? `+${diff.toFixed(1)} kg` : `${diff.toFixed(1)} kg`;
+                }
+                
+                row.innerHTML = `
+                    <td>${fecha}</td>
+                    <td><strong>${pesada.caravana}</strong></td>
+                    <td>${pesada.peso} kg</td>
+                    <td>${ganancia}</td>
+                    <td>${pesada.observaciones || '-'}</td>
+                `;
+            });
+        }
+
+        function actualizarTablaMovimientos() {
+            const tbody = document.getElementById('movimientos-tbody');
+            tbody.innerHTML = '';
+            movimientos.forEach(mov => {
+                const row = tbody.insertRow();
+                const fecha = mov.fecha ? new Date(mov.fecha).toLocaleDateString('es-AR') : '';
+                
+                let badgeClass = 'badge-primary';
+                if (mov.tipoMovimiento === 'Venta') badgeClass = 'badge-success';
+                if (mov.tipoMovimiento === 'Muerte') badgeClass = 'badge-danger';
+                if (mov.tipoMovimiento === 'Nacimiento') badgeClass = 'badge-warning';
+                
+                row.innerHTML = `
+                    <td>${fecha}</td>
+                    <td><span class="badge ${badgeClass}">${mov.tipoMovimiento}</span></td>
+                    <td><strong>${mov.caravana}</strong></td>
+                    <td>${mov.detalles || '-'}</td>
+                    <td>${mov.observaciones || '-'}</td>
+                `;
+            });
+        }
+
+        function actualizarTablaInventario() {
+            const tbody = document.getElementById('inventario-tbody');
+            tbody.innerHTML = '';
+            inventario.forEach(item => {
+                const total = (parseFloat(item.cantidad) * parseFloat(item.precioUnitario)).toFixed(2);
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td><strong>${item.item}</strong></td>
+                    <td>${item.cantidad}</td>
+                    <td>$${parseFloat(item.precioUnitario).toFixed(2)}</td>
+                    <td><strong>$${total}</strong></td>
+                `;
+            });
+        }
+
+        function actualizarSelectores() {
+            // Selector de parcelas en modal animal
+            const selectParcela = document.getElementById('parcela-animal');
+            selectParcela.innerHTML = '<option value="">Seleccionar...</option>';
+            parcelas.forEach(p => {
+                selectParcela.innerHTML += `<option value="${p.nombre}">${p.nombre}</option>`;
+            });
+
+            // Selector de caravanas en modal control
+            const selectCaravanaControl = document.getElementById('caravana-control');
+            selectCaravanaControl.innerHTML = '<option value="">Seleccionar...</option>';
+            animales.forEach(a => {
+                selectCaravanaControl.innerHTML += `<option value="${a.caravana}">${a.caravana} - ${a.raza}</option>`;
+            });
+
+            // Selector de caravanas en modal pesada
+            const selectCaravanaPesada = document.getElementById('caravana-pesada');
+            selectCaravanaPesada.innerHTML = '<option value="">Seleccionar...</option>';
+            animales.forEach(a => {
+                selectCaravanaPesada.innerHTML += `<option value="${a.caravana}">${a.caravana} - ${a.raza}</option>`;
+            });
+        }
+
+        // FORMULARIOS
+        async function agregarAnimal(event) {
+            event.preventDefault();
+            const maxId = animales.length > 0 ? Math.max(...animales.map(a => a.id)) : 0;
+            const nuevoAnimal = {
+                id: maxId + 1,
+                caravana: document.getElementById('caravana').value,
+                raza: document.getElementById('raza').value,
+                sexo: document.getElementById('sexo').value,
+                fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                peso: document.getElementById('peso').value || '',
+                parcela: document.getElementById('parcela-animal').value,
+                estado: document.getElementById('estado').value,
+                observaciones: document.getElementById('observaciones').value || ''
+            };
+            await guardarEnAPI('Animales', nuevoAnimal);
+            animales.push(nuevoAnimal);
+            actualizarTodo();
+            closeModal('animal-modal');
+            document.getElementById('animal-form').reset();
+            showAlert('✓ Animal agregado correctamente', 'success');
+        }
+
+        async function agregarParcela(event) {
+            event.preventDefault();
+            const maxId = parcelas.length > 0 ? Math.max(...parcelas.map(p => p.id)) : 0;
+            const nuevaParcela = {
+                id: maxId + 1,
+                nombre: document.getElementById('nombre-parcela').value,
+                hectareas: parseFloat(document.getElementById('hectareas').value),
+                tipoPasto: document.getElementById('tipoPasto').value,
+                capacidad: parseInt(document.getElementById('capacidad').value),
+                estado: document.getElementById('estado-parcela').value
+            };
+            await guardarEnAPI('Parcelas', nuevaParcela);
+            parcelas.push(nuevaParcela);
+            actualizarTodo();
+            closeModal('parcela-modal');
+            document.getElementById('parcela-form').reset();
+            showAlert('✓ Parcela agregada correctamente', 'success');
+        }
+
+        async function agregarControl(event) {
+            event.preventDefault();
+            const maxId = controles.length > 0 ? Math.max(...controles.map(c => c.id)) : 0;
+            const nuevoControl = {
+                id: maxId + 1,
+                fecha: document.getElementById('fecha-control').value,
+                caravana: document.getElementById('caravana-control').value,
+                tipoControl: document.getElementById('tipo-control').value,
+                producto: document.getElementById('producto-control').value || '',
+                dosis: document.getElementById('dosis-control').value || '',
+                veterinario: document.getElementById('veterinario-control').value || '',
+                observaciones: document.getElementById('observaciones-control').value || '',
+                proximoControl: document.getElementById('proximo-control').value || ''
+            };
+            await guardarEnAPI('Controles', nuevoControl);
+            controles.push(nuevoControl);
+            actualizarTodo();
+            closeModal('control-modal');
+            document.getElementById('control-form').reset();
+            document.getElementById('fecha-control').valueAsDate = new Date();
+            showAlert('✓ Control sanitario registrado', 'success');
+        }
+
+        async function agregarPesada(event) {
+            event.preventDefault();
+            const maxId = pesadas.length > 0 ? Math.max(...pesadas.map(p => p.id)) : 0;
+            const caravana = document.getElementById('caravana-pesada').value;
+            const peso = parseFloat(document.getElementById('peso-pesada').value);
+            
+            const nuevaPesada = {
+                id: maxId + 1,
+                fecha: document.getElementById('fecha-pesada').value,
+                caravana: caravana,
+                peso: peso,
+                observaciones: document.getElementById('observaciones-pesada').value || ''
+            };
+            
+            await guardarEnAPI('Pesadas', nuevaPesada);
+            pesadas.push(nuevaPesada);
+            
+            // Actualizar peso en la tabla de animales
+            const animal = animales.find(a => a.caravana === caravana);
+            if (animal) {
+                animal.peso = peso;
+                await guardarEnAPI('Animales', animal);
+            }
+            
+            actualizarTodo();
+            closeModal('pesada-modal');
+            document.getElementById('pesada-form').reset();
+            document.getElementById('fecha-pesada').valueAsDate = new Date();
+            showAlert('✓ Pesada registrada correctamente', 'success');
+        }
+
+        async function agregarMovimiento(event) {
+            event.preventDefault();
+            const maxId = movimientos.length > 0 ? Math.max(...movimientos.map(m => m.id)) : 0;
+            const nuevoMovimiento = {
+                id: maxId + 1,
+                fecha: document.getElementById('fecha-movimiento').value,
+                tipoMovimiento: document.getElementById('tipo-movimiento').value,
+                caravana: document.getElementById('caravana-movimiento').value,
+                detalles: document.getElementById('detalles-movimiento').value || '',
+                observaciones: document.getElementById('observaciones-movimiento').value || ''
+            };
+            await guardarEnAPI('Movimientos', nuevoMovimiento);
+            movimientos.push(nuevoMovimiento);
+            actualizarTodo();
+            closeModal('movimiento-modal');
+            document.getElementById('movimiento-form').reset();
+            document.getElementById('fecha-movimiento').valueAsDate = new Date();
+            showAlert('✓ Movimiento registrado correctamente', 'success');
+        }
+
+        async function agregarInventario(event) {
+            event.preventDefault();
+            const maxId = inventario.length > 0 ? Math.max(...inventario.map(i => i.id)) : 0;
+            const nuevoItem = {
+                id: maxId + 1,
+                item: document.getElementById('item-nombre').value,
+                cantidad: parseInt(document.getElementById('cantidad-item').value),
+                precioUnitario: parseFloat(document.getElementById('precio-unitario').value)
+            };
+            await guardarEnAPI('Inventario', nuevoItem);
+            inventario.push(nuevoItem);
+            actualizarTodo();
+            closeModal('inventario-modal');
+            document.getElementById('inventario-form').reset();
+            showAlert('✓ Item agregado correctamente', 'success');
+        }
+
+        // NAVEGACIÓN
+        function showSection(sectionName) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+
+            document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionName).classList.add('active');
+
+            const titles = {
+                'dashboard': 'Dashboard',
+                'animales': 'Animales',
+                'parcelas': 'Parcelas',
+                'controles': 'Controles Sanitarios',
+                'pesadas': 'Historial de Peso',
+                'movimientos': 'Movimientos',
+                'inventario': 'Inventario'
+            };
+            document.getElementById('page-title').textContent = titles[sectionName];
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            document.querySelector('.content-area').insertBefore(alertDiv, document.querySelector('.content-area').firstChild);
+            setTimeout(() => alertDiv.remove(), 4000);
+        }
+    </script>
+</body>
+</html>
+
