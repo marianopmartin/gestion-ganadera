@@ -54,6 +54,7 @@
         .nav-menu {
             flex: 1;
             padding: 20px 0;
+            overflow-y: auto;
         }
 
         .nav-item {
@@ -460,8 +461,7 @@
     </style>
 </head>
 <body>
-
-        <div class="container">
+    <div class="container">
         <!-- SIDEBAR -->
         <div class="sidebar">
             <div class="logo">
@@ -496,6 +496,10 @@
                 <div class="nav-item" onclick="showSection('inventario')">
                     <span class="nav-icon">📦</span>
                     <span class="nav-text">Inventario</span>
+                </div>
+                <div class="nav-item" onclick="showSection('mapa')">
+                    <span class="nav-icon">🗺️</span>
+                    <span class="nav-text">Mapa del Campo</span>
                 </div>
             </div>
         </div>
@@ -673,7 +677,7 @@
                                         <th>Fecha</th>
                                         <th>Caravana</th>
                                         <th>Peso (kg)</th>
-                                        <th>Ganancia desde última pesada</th>
+                                        <th>Ganancia</th>
                                         <th>Observaciones</th>
                                     </tr>
                                 </thead>
@@ -730,11 +734,53 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- MAPA DEL CAMPO -->
+                <div id="mapa" class="content-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Mapa Georeferenciado del Campo</div>
+                            <button class="btn btn-primary" onclick="abrirMapaCompleto()">🔍 Ver en Pantalla Completa</button>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <iframe 
+                                src="https://www.google.com/maps/d/embed?mid=1UpHPuzRz8KW9uI3YkuGNXiItf-YF9nI&ehbc=2E312F&noprof=1" 
+                                width="100%" 
+                                height="600" 
+                                style="border:0; display: block;"
+                                allowfullscreen="" 
+                                loading="lazy">
+                            </iframe>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Distribución de Animales por Parcela</div>
+                        </div>
+                        <div class="card-body">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Parcela</th>
+                                        <th>Animales</th>
+                                        <th>Capacidad</th>
+                                        <th>% Ocupación</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="distribucion-parcelas"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-        <!-- MODAL ANIMAL -->
+    <!-- MODALES -->
+    
+    <!-- MODAL ANIMAL -->
     <div id="animal-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1013,8 +1059,8 @@
         </div>
     </div>
 
-        <script>
-        // API URL - YA CONFIGURADA CON TU URL
+    <script>
+        // API URL - YA CONFIGURADA
         const API_URL = 'https://script.google.com/macros/s/AKfycbzuihykZzsLTjBzDI1zSEeYGv8fEnFIVL5oktzkqTyJVtkBQLjb6NCcHTe_OyyPWS0Kug/exec';
         
         let animales = [];
@@ -1027,7 +1073,6 @@
         // Cargar datos al iniciar
         window.addEventListener('load', function() {
             cargarDatos();
-            // Establecer fecha de hoy por defecto en formularios
             document.getElementById('fecha-control').valueAsDate = new Date();
             document.getElementById('fecha-pesada').valueAsDate = new Date();
             document.getElementById('fecha-movimiento').valueAsDate = new Date();
@@ -1082,21 +1127,19 @@
             actualizarTablaPesadas();
             actualizarTablaMovimientos();
             actualizarTablaInventario();
+            actualizarDistribucionParcelas();
             actualizarSelectores();
         }
 
         function actualizarDashboard() {
-            // Stats principales
             document.getElementById('total-animales').textContent = animales.length;
             document.getElementById('total-parcelas').textContent = parcelas.length;
 
-            // Peso promedio
             const animalesConPeso = animales.filter(a => a.peso && a.peso !== '');
             const pesoPromedio = animalesConPeso.length > 0 ?
                 (animalesConPeso.reduce((sum, a) => sum + parseFloat(a.peso), 0) / animalesConPeso.length).toFixed(1) : 0;
             document.getElementById('peso-promedio').textContent = pesoPromedio;
 
-            // Controles este mes
             const hoy = new Date();
             const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
             const controlesEsteMes = controles.filter(c => {
@@ -1105,7 +1148,6 @@
             }).length;
             document.getElementById('total-controles-mes').textContent = controlesEsteMes;
 
-            // Resumen por sexo
             const machos = animales.filter(a => a.sexo === 'Macho').length;
             const hembras = animales.filter(a => a.sexo === 'Hembra').length;
             document.getElementById('total-machos').textContent = machos;
@@ -1113,7 +1155,6 @@
             document.getElementById('pct-machos').textContent = animales.length > 0 ? ((machos/animales.length)*100).toFixed(1) + '%' : '0%';
             document.getElementById('pct-hembras').textContent = animales.length > 0 ? ((hembras/animales.length)*100).toFixed(1) + '%' : '0%';
 
-            // Últimos movimientos
             const tbody = document.getElementById('ultimos-movimientos');
             tbody.innerHTML = '';
             const ultimosMovimientos = movimientos.slice(-5).reverse();
@@ -1188,7 +1229,6 @@
             const tbody = document.getElementById('pesadas-tbody');
             tbody.innerHTML = '';
             
-            // Agrupar pesadas por caravana
             const pesadasPorCaravana = {};
             pesadas.forEach(pesada => {
                 if (!pesadasPorCaravana[pesada.caravana]) {
@@ -1197,12 +1237,10 @@
                 pesadasPorCaravana[pesada.caravana].push(pesada);
             });
 
-            // Ordenar pesadas por fecha
             pesadas.forEach(pesada => {
                 const row = tbody.insertRow();
                 const fecha = pesada.fecha ? new Date(pesada.fecha).toLocaleDateString('es-AR') : '';
                 
-                // Calcular ganancia desde última pesada
                 const pesadasAnimal = pesadasPorCaravana[pesada.caravana] || [];
                 const pesadasOrdenadas = pesadasAnimal.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
                 const indexActual = pesadasOrdenadas.findIndex(p => p.id === pesada.id);
@@ -1263,22 +1301,57 @@
             });
         }
 
+        function actualizarDistribucionParcelas() {
+            const tbody = document.getElementById('distribucion-parcelas');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            parcelas.forEach(parcela => {
+                const animalesEnParcela = animales.filter(a => 
+                    a.parcela === parcela.nombre && a.estado === 'Activo'
+                ).length;
+                
+                const ocupacion = parcela.capacidad > 0 ? 
+                    ((animalesEnParcela / parcela.capacidad) * 100).toFixed(1) : 0;
+                
+                let estadoOcupacion = '';
+                let badgeClass = '';
+                if (ocupacion < 60) {
+                    estadoOcupacion = 'Baja';
+                    badgeClass = 'badge-success';
+                } else if (ocupacion < 90) {
+                    estadoOcupacion = 'Media';
+                    badgeClass = 'badge-warning';
+                } else {
+                    estadoOcupacion = 'Alta';
+                    badgeClass = 'badge-danger';
+                }
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${parcela.nombre}</strong></td>
+                    <td>${animalesEnParcela}</td>
+                    <td>${parcela.capacidad}</td>
+                    <td>${ocupacion}%</td>
+                    <td><span class="badge ${badgeClass}">${estadoOcupacion}</span></td>
+                `;
+            });
+        }
+
         function actualizarSelectores() {
-            // Selector de parcelas en modal animal
             const selectParcela = document.getElementById('parcela-animal');
             selectParcela.innerHTML = '<option value="">Seleccionar...</option>';
             parcelas.forEach(p => {
                 selectParcela.innerHTML += `<option value="${p.nombre}">${p.nombre}</option>`;
             });
 
-            // Selector de caravanas en modal control
             const selectCaravanaControl = document.getElementById('caravana-control');
             selectCaravanaControl.innerHTML = '<option value="">Seleccionar...</option>';
             animales.forEach(a => {
                 selectCaravanaControl.innerHTML += `<option value="${a.caravana}">${a.caravana} - ${a.raza}</option>`;
             });
 
-            // Selector de caravanas en modal pesada
             const selectCaravanaPesada = document.getElementById('caravana-pesada');
             selectCaravanaPesada.innerHTML = '<option value="">Seleccionar...</option>';
             animales.forEach(a => {
@@ -1286,7 +1359,6 @@
             });
         }
 
-        // FORMULARIOS
         async function agregarAnimal(event) {
             event.preventDefault();
             const maxId = animales.length > 0 ? Math.max(...animales.map(a => a.id)) : 0;
@@ -1368,7 +1440,6 @@
             await guardarEnAPI('Pesadas', nuevaPesada);
             pesadas.push(nuevaPesada);
             
-            // Actualizar peso en la tabla de animales
             const animal = animales.find(a => a.caravana === caravana);
             if (animal) {
                 animal.peso = peso;
@@ -1419,7 +1490,6 @@
             showAlert('✓ Item agregado correctamente', 'success');
         }
 
-        // NAVEGACIÓN
         function showSection(sectionName) {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             event.target.closest('.nav-item').classList.add('active');
@@ -1434,7 +1504,8 @@
                 'controles': 'Controles Sanitarios',
                 'pesadas': 'Historial de Peso',
                 'movimientos': 'Movimientos',
-                'inventario': 'Inventario'
+                'inventario': 'Inventario',
+                'mapa': 'Mapa del Campo'
             };
             document.getElementById('page-title').textContent = titles[sectionName];
         }
@@ -1460,7 +1531,10 @@
             document.querySelector('.content-area').insertBefore(alertDiv, document.querySelector('.content-area').firstChild);
             setTimeout(() => alertDiv.remove(), 4000);
         }
+
+        function abrirMapaCompleto() {
+            window.open('https://www.google.com/maps/d/viewer?mid=1UpHPuzRz8KW9uI3YkuGNXiItf-YF9nI&ehbc=2E312F&noprof=1', '_blank');
+        }
     </script>
 </body>
 </html>
-
