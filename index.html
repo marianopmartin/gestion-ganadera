@@ -5,676 +5,502 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#0f0f0f">
 <title>Campo Ganadero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f0f0f;
-  --bg2: #181818;
-  --bg3: #222222;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.15);
-  --text: #f0ede8;
-  --text2: #888;
-  --text3: #555;
-  --green: #4ade80;
-  --green-bg: rgba(74,222,128,0.1);
-  --amber: #fbbf24;
-  --amber-bg: rgba(251,191,36,0.1);
-  --red: #f87171;
-  --red-bg: rgba(248,113,113,0.1);
-  --blue: #60a5fa;
-  --blue-bg: rgba(96,165,250,0.1);
-  --accent: #e8d5b0;
-  --radius: 10px;
-  --font-mono: 'DM Mono', monospace;
-  --font: 'DM Sans', sans-serif;
+  --bg:#0f0f0f;--bg2:#181818;--bg3:#222222;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+  --text:#f0ede8;--text2:#888;--text3:#555;
+  --green:#4ade80;--green-bg:rgba(74,222,128,0.1);
+  --amber:#fbbf24;--amber-bg:rgba(251,191,36,0.1);
+  --red:#f87171;--red-bg:rgba(248,113,113,0.1);
+  --blue:#60a5fa;--blue-bg:rgba(96,165,250,0.1);
+  --accent:#e8d5b0;--radius:10px;--sidebar:220px;
+  --font-mono:'DM Mono',monospace;--font:'DM Sans',sans-serif;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
-button { font-family: var(--font); cursor: pointer; border: none; background: none; color: inherit; }
-input, select, textarea { font-family: var(--font); font-size: 14px; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+button{font-family:var(--font);cursor:pointer;border:none;background:none;color:inherit;}
+input,select{font-family:var(--font);font-size:14px;}
 
-.app { display: flex; flex-direction: column; min-height: 100vh; max-width: 480px; margin: 0 auto; }
+/* MOBILE */
+.mobile-app{display:flex;flex-direction:column;min-height:100vh;}
+.desktop-app{display:none;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:10;}
+.topbar-title{font-size:15px;font-weight:500;}
+.topbar-sub{font-size:11px;color:var(--text2);margin-top:1px;font-family:var(--font-mono);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;}
+.m-content{flex:1;overflow-y:auto;padding-bottom:80px;}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-top:1px solid var(--border);padding:8px 0 20px;z-index:10;}
+.bar-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;}
+.bar-icon{font-size:20px;line-height:1;}
+.bar-label{font-size:9px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;}
+.bar-btn.active .bar-label{color:var(--accent);}
 
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 20px 12px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-  position: sticky; top: 0; z-index: 10;
+/* DESKTOP */
+@media(min-width:768px){
+  .mobile-app{display:none;}
+  .desktop-app{display:flex;min-height:100vh;}
+  .sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:20;}
+  .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);}
+  .sidebar-logo-title{font-size:15px;font-weight:500;}
+  .sidebar-logo-sub{font-size:11px;color:var(--text2);margin-top:2px;font-family:var(--font-mono);}
+  .sidebar-nav{flex:1;padding:12px 10px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);font-size:13px;color:var(--text2);cursor:pointer;transition:all 0.15s;margin-bottom:2px;width:100%;text-align:left;}
+  .nav-item:hover{background:var(--bg3);color:var(--text);}
+  .nav-item.active{background:var(--bg3);color:var(--text);font-weight:500;}
+  .nav-icon{font-size:16px;width:20px;text-align:center;}
+  .sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:var(--font-mono);}
+  .d-main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+  .d-topbar{padding:20px 32px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:10;}
+  .d-topbar-title{font-size:20px;font-weight:500;}
+  .d-topbar-sub{font-size:12px;color:var(--text2);margin-top:2px;font-family:var(--font-mono);}
+  .d-content{flex:1;padding:28px 32px;}
+  .d-screen{display:none;}
+  .d-screen.active{display:block;}
+  .d-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+  .d-metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+  .d-metric-val{font-size:36px;font-weight:300;line-height:1;margin-bottom:6px;}
+  .d-metric-label{font-size:12px;color:var(--text2);}
+  .d-metric-sub{font-size:10px;color:var(--text3);margin-top:3px;font-family:var(--font-mono);}
+  .d-grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .d-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+  .d-card-title{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;}
+  .d-table{width:100%;border-collapse:collapse;}
+  .d-table th{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;padding:0 12px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .d-table td{padding:12px;border-bottom:1px solid var(--border);font-size:13px;}
+  .d-table tr:last-child td{border-bottom:none;}
+  .d-table tr:hover td{background:var(--bg3);cursor:pointer;}
+  .d-alert{border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;border:1px solid;}
+  .d-alert-r{background:var(--red-bg);border-color:rgba(248,113,113,0.2);}
+  .d-alert-a{background:var(--amber-bg);border-color:rgba(251,191,36,0.2);}
+  .d-alert-b{background:var(--blue-bg);border-color:rgba(96,165,250,0.2);}
+  .d-alert-title{font-size:13px;font-weight:500;}
+  .d-alert-r .d-alert-title{color:var(--red);}
+  .d-alert-a .d-alert-title{color:var(--amber);}
+  .d-alert-b .d-alert-title{color:var(--blue);}
+  .d-alert-sub{font-size:12px;color:var(--text2);margin-top:3px;}
 }
-.topbar-title { font-size: 15px; font-weight: 500; letter-spacing: 0.01em; }
-.topbar-sub { font-size: 11px; color: var(--text2); margin-top: 1px; font-family: var(--font-mono); }
-.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 5px; }
 
-.content { flex: 1; overflow-y: auto; padding-bottom: 80px; }
-
-.nav-tabs {
-  display: flex; gap: 4px; padding: 12px 16px;
-  overflow-x: auto; scrollbar-width: none;
-}
-.nav-tabs::-webkit-scrollbar { display: none; }
-.tab-btn {
-  padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
-  border: 1px solid var(--border); color: var(--text2); white-space: nowrap;
-  transition: all 0.15s;
-}
-.tab-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
-
-.screen { display: none; }
-.screen.active { display: block; }
-
-.section { padding: 0 16px 20px; }
-.section-title {
-  font-size: 10px; font-weight: 500; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 0.08em;
-  margin: 20px 0 10px;
-}
-
-.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 4px; }
-.metric {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px;
-}
-.metric-val { font-size: 28px; font-weight: 300; color: var(--text); line-height: 1; margin-bottom: 4px; }
-.metric-label { font-size: 11px; color: var(--text2); }
-.metric-sub { font-size: 10px; color: var(--text3); margin-top: 2px; font-family: var(--font-mono); }
-
-.alert {
-  border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px;
-  border: 1px solid;
-}
-.alert-r { background: var(--red-bg); border-color: rgba(248,113,113,0.2); }
-.alert-a { background: var(--amber-bg); border-color: rgba(251,191,36,0.2); }
-.alert-b { background: var(--blue-bg); border-color: rgba(96,165,250,0.2); }
-.alert-title { font-size: 13px; font-weight: 500; }
-.alert-r .alert-title { color: var(--red); }
-.alert-a .alert-title { color: var(--amber); }
-.alert-b .alert-title { color: var(--blue); }
-.alert-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
-
-.list-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 0; border-bottom: 1px solid var(--border);
-  cursor: pointer; transition: opacity 0.15s;
-}
-.list-item:last-child { border-bottom: none; }
-.list-item:active { opacity: 0.6; }
-
-.avatar {
-  width: 38px; height: 38px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 500; flex-shrink: 0;
-}
-.av-m { background: rgba(96,165,250,0.15); color: var(--blue); }
-.av-h { background: rgba(244,114,182,0.15); color: #f472b6; }
-.av-c { background: rgba(74,222,128,0.15); color: var(--green); }
-
-.item-name { font-size: 13px; font-weight: 500; color: var(--text); font-family: var(--font-mono); }
-.item-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-.item-right { margin-left: auto; text-align: right; }
-.item-val { font-size: 13px; font-weight: 500; }
-.item-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-.badge {
-  display: inline-block; font-size: 10px; font-weight: 500;
-  padding: 3px 8px; border-radius: 20px; font-family: var(--font-mono);
-}
-.bg { background: var(--green-bg); color: var(--green); }
-.ba { background: var(--amber-bg); color: var(--amber); }
-.br { background: var(--red-bg); color: var(--red); }
-.bb { background: var(--blue-bg); color: var(--blue); }
-
-.card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px; margin-bottom: 10px;
-}
-.card-title { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
-
-.detail-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 0; border-bottom: 1px solid var(--border);
-  font-size: 13px;
-}
-.detail-row:last-child { border-bottom: none; }
-.detail-key { color: var(--text2); }
-.detail-val { font-weight: 500; font-family: var(--font-mono); font-size: 12px; }
-
-.ble-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 24px 20px; text-align: center;
-  margin-bottom: 16px;
-}
-.ble-icon { font-size: 32px; margin-bottom: 10px; }
-.ble-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
-.ble-sub { font-size: 12px; color: var(--text2); }
-
-.scan-box {
-  background: var(--green-bg); border: 1px solid rgba(74,222,128,0.2);
-  border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
-  display: none;
-}
-.scan-box.visible { display: block; }
-.scan-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-.scan-num { font-size: 22px; font-weight: 500; color: var(--green); font-family: var(--font-mono); }
-.scan-found { font-size: 11px; color: var(--text2); margin-top: 4px; }
-
-.btn {
-  width: 100%; padding: 13px; border-radius: var(--radius);
-  font-size: 14px; font-weight: 500; transition: opacity 0.15s;
-  margin-top: 8px;
-}
-.btn:active { opacity: 0.7; }
-.btn-primary { background: var(--text); color: var(--bg); }
-.btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border2); }
-
-.timeline { padding-left: 20px; position: relative; }
-.tl-line { position: absolute; left: 6px; top: 6px; bottom: 6px; width: 1px; background: var(--border2); }
-.tl-item { position: relative; padding: 0 0 16px 16px; }
-.tl-dot { position: absolute; left: -14px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--text3); }
-.tl-dot.ok { background: var(--green); }
-.tl-date { font-size: 10px; color: var(--text3); font-family: var(--font-mono); margin-bottom: 2px; }
-.tl-desc { font-size: 13px; font-weight: 500; }
-.tl-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-.form-group { margin-bottom: 14px; }
-.form-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; display: block; }
-.form-input {
-  width: 100%; padding: 11px 13px;
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-radius: var(--radius); color: var(--text); font-size: 14px;
-  outline: none; transition: border-color 0.15s;
-}
-.form-input:focus { border-color: var(--text2); }
-.form-input::placeholder { color: var(--text3); }
-select.form-input option { background: var(--bg2); }
-
-.bottom-bar {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px;
-  display: grid; grid-template-columns: repeat(5, 1fr);
-  background: var(--bg); border-top: 1px solid var(--border);
-  padding: 8px 0 20px;
-}
-.bar-btn {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 6px 0; transition: opacity 0.15s;
-}
-.bar-btn:active { opacity: 0.5; }
-.bar-icon { font-size: 20px; line-height: 1; }
-.bar-label { font-size: 9px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
-.bar-btn.active .bar-label { color: var(--accent); }
-
-.loading { text-align: center; padding: 40px 20px; color: var(--text2); font-size: 13px; }
-.empty { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 13px; }
-
-.back-btn { font-size: 13px; color: var(--blue); padding: 0; }
-.header-action { font-size: 13px; color: var(--accent); }
+/* SHARED */
+.screen{display:none;}.screen.active{display:block;}
+.section{padding:0 16px 20px;}
+.section-title{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin:20px 0 10px;}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 16px 4px;}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+.metric-val{font-size:28px;font-weight:300;line-height:1;margin-bottom:4px;}
+.metric-label{font-size:11px;color:var(--text2);}
+.metric-sub{font-size:10px;color:var(--text3);margin-top:2px;font-family:var(--font-mono);}
+.alert{border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;border:1px solid;}
+.alert-r{background:var(--red-bg);border-color:rgba(248,113,113,0.2);}
+.alert-a{background:var(--amber-bg);border-color:rgba(251,191,36,0.2);}
+.alert-b{background:var(--blue-bg);border-color:rgba(96,165,250,0.2);}
+.alert-title{font-size:13px;font-weight:500;}
+.alert-r .alert-title{color:var(--red);}
+.alert-a .alert-title{color:var(--amber);}
+.alert-b .alert-title{color:var(--blue);}
+.alert-sub{font-size:11px;color:var(--text2);margin-top:3px;}
+.list-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.list-item:last-child{border-bottom:none;}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;}
+.av-m{background:rgba(96,165,250,0.15);color:var(--blue);}
+.av-h{background:rgba(244,114,182,0.15);color:#f472b6;}
+.av-c{background:rgba(74,222,128,0.15);color:var(--green);}
+.item-name{font-size:13px;font-weight:500;font-family:var(--font-mono);}
+.item-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.item-right{margin-left:auto;text-align:right;}
+.item-meta{font-size:11px;color:var(--text2);}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;font-family:var(--font-mono);}
+.bg{background:var(--green-bg);color:var(--green);}
+.ba{background:var(--amber-bg);color:var(--amber);}
+.br{background:var(--red-bg);color:var(--red);}
+.bb{background:var(--blue-bg);color:var(--blue);}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;}
+.card-title{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em;}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.detail-row:last-child{border-bottom:none;}
+.detail-key{color:var(--text2);}
+.detail-val{font-weight:500;font-family:var(--font-mono);font-size:12px;}
+.nav-tabs{display:flex;gap:4px;padding:12px 16px;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.tab-btn{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);color:var(--text2);white-space:nowrap;}
+.tab-btn.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;display:block;}
+.form-input{width:100%;padding:11px 13px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:14px;outline:none;}
+.form-input:focus{border-color:var(--text2);}
+.form-input::placeholder{color:var(--text3);}
+select.form-input option{background:var(--bg2);}
+.btn{width:100%;padding:13px;border-radius:var(--radius);font-size:14px;font-weight:500;margin-top:8px;}
+.btn-primary{background:var(--text);color:var(--bg);}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border2);}
+.btn-sm{width:auto;padding:8px 16px;font-size:12px;margin-top:0;}
+.ble-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;text-align:center;margin-bottom:16px;}
+.ble-icon{font-size:32px;margin-bottom:10px;}
+.ble-title{font-size:15px;font-weight:500;margin-bottom:4px;}
+.ble-sub{font-size:12px;color:var(--text2);}
+.scan-box{background:var(--green-bg);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius);padding:16px;margin-bottom:12px;display:none;}
+.scan-box.visible{display:block;}
+.scan-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+.scan-num{font-size:22px;font-weight:500;color:var(--green);font-family:var(--font-mono);}
+.timeline{padding-left:20px;position:relative;}
+.tl-line{position:absolute;left:6px;top:6px;bottom:6px;width:1px;background:var(--border2);}
+.tl-item{position:relative;padding:0 0 16px 16px;}
+.tl-dot{position:absolute;left:-14px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--text3);}
+.tl-dot.ok{background:var(--green);}
+.tl-date{font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-bottom:2px;}
+.tl-desc{font-size:13px;font-weight:500;}
+.tl-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.loading{text-align:center;padding:40px 20px;color:var(--text2);font-size:13px;}
+.empty{text-align:center;padding:20px;color:var(--text3);font-size:13px;}
+.header-action{font-size:13px;color:var(--accent);}
+.mono{font-family:var(--font-mono);font-size:12px;}
 </style>
 </head>
 <body>
-<div class="app">
+
+<!-- MOBILE -->
+<div class="mobile-app">
   <div class="topbar">
-    <div>
-      <div class="topbar-title" id="topbar-title">Mi campo</div>
-      <div class="topbar-sub" id="topbar-sub"><span class="status-dot"></span>conectado</div>
-    </div>
-    <div id="topbar-action"></div>
+    <div><div class="topbar-title" id="m-topbar-title">Mi campo</div><div class="topbar-sub"><span class="status-dot"></span>conectado</div></div>
+    <div id="m-topbar-action"></div>
   </div>
-
-  <div class="content">
-
-    <!-- DASHBOARD -->
-    <div id="screen-dashboard" class="screen active">
-      <div class="metrics" id="metrics-row">
-        <div class="metric"><div class="metric-val" id="m-total">—</div><div class="metric-label">Animales activos</div></div>
+  <div class="m-content">
+    <div id="m-screen-dashboard" class="screen active">
+      <div class="metrics">
+        <div class="metric"><div class="metric-val" id="m-total">—</div><div class="metric-label">Animales</div></div>
         <div class="metric"><div class="metric-val" id="m-pariciones">—</div><div class="metric-label">Pariciones</div></div>
-        <div class="metric"><div class="metric-val" id="m-peso">—</div><div class="metric-label">Peso prom. kg</div><div class="metric-sub">último pesaje</div></div>
+        <div class="metric"><div class="metric-val" id="m-peso">—</div><div class="metric-label">Peso prom.</div><div class="metric-sub">kg</div></div>
         <div class="metric"><div class="metric-val" id="m-servicio">—</div><div class="metric-label">En servicio</div></div>
       </div>
       <div class="section">
-        <div class="section-title">Alertas</div>
-        <div id="alertas-container"><div class="loading">Cargando...</div></div>
-        <div class="section-title">Cuadros</div>
-        <div id="cuadros-list"><div class="loading">Cargando...</div></div>
+        <div class="section-title">Alertas</div><div id="m-alertas"></div>
+        <div class="section-title">Cuadros</div><div id="m-cuadros"></div>
       </div>
     </div>
-
-    <!-- ANIMALES -->
-    <div id="screen-animales" class="screen">
+    <div id="m-screen-animales" class="screen">
       <div class="nav-tabs">
-        <button class="tab-btn active" onclick="filtrarAnimales('todos', this)">Todos</button>
-        <button class="tab-btn" onclick="filtrarAnimales('hembra', this)">Hembras</button>
-        <button class="tab-btn" onclick="filtrarAnimales('macho', this)">Machos</button>
+        <button class="tab-btn active" onclick="mFiltrar('todos',this)">Todos</button>
+        <button class="tab-btn" onclick="mFiltrar('hembra',this)">Hembras</button>
+        <button class="tab-btn" onclick="mFiltrar('macho',this)">Machos</button>
       </div>
       <div class="section">
-        <div class="form-group" style="margin-bottom:8px">
-          <input class="form-input" type="search" placeholder="Buscar caravana..." id="search-caravana" oninput="buscarAnimal(this.value)">
-        </div>
-        <div id="animales-list"><div class="loading">Cargando...</div></div>
+        <div class="form-group" style="margin-bottom:8px"><input class="form-input" type="search" placeholder="Buscar caravana..." id="m-search" oninput="mRenderAnimales()"></div>
+        <div id="m-animales-list"><div class="loading">Cargando...</div></div>
       </div>
     </div>
-
-    <!-- LECTOR BLE -->
-    <div id="screen-lector" class="screen">
+    <div id="m-screen-lector" class="screen">
       <div class="section" style="padding-top:16px">
-        <div class="ble-card">
-          <div class="ble-icon">⬡</div>
-          <div class="ble-title" id="ble-status">Listo para escanear</div>
-          <div class="ble-sub">Acercá el lector a la caravana del animal</div>
-        </div>
-        <div class="scan-box" id="scan-box">
-          <div class="scan-label">Caravana leída</div>
-          <div class="scan-num" id="scan-num">—</div>
-          <div class="scan-found" id="scan-found"></div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Caravana SENASA</label>
-          <input class="form-input" type="text" id="caravana-input" placeholder="AR000000000" oninput="onCaravanaInput(this.value)" style="font-family:var(--font-mono);font-size:16px;letter-spacing:0.05em">
-        </div>
-        <button class="btn btn-primary" onclick="buscarPorCaravana()">Buscar animal</button>
-        <button class="btn btn-secondary" onclick="showScreen('nuevo-animal')">+ Registrar nuevo animal</button>
-        <div id="lector-resultado" style="margin-top:16px"></div>
+        <div class="ble-card"><div class="ble-icon">⬡</div><div class="ble-title">Listo para escanear</div><div class="ble-sub">El lector escribe la caravana automáticamente</div></div>
+        <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="m-caravana-input" placeholder="AR000000000" style="font-family:var(--font-mono);font-size:16px"></div>
+        <button class="btn btn-primary" onclick="buscarCaravana('m')">Buscar animal</button>
+        <button class="btn btn-secondary" onclick="mShowScreen('nuevo-animal')">+ Registrar nuevo animal</button>
+        <div id="m-lector-resultado" style="margin-top:16px"></div>
       </div>
     </div>
-
-    <!-- SANIDAD -->
-    <div id="screen-sanidad" class="screen">
+    <div id="m-screen-sanidad" class="screen">
       <div class="nav-tabs">
-        <button class="tab-btn active" onclick="filtrarSanidad('todos', this)">Todos</button>
-        <button class="tab-btn" onclick="filtrarSanidad('brucelosis', this)">Brucelosis</button>
-        <button class="tab-btn" onclick="filtrarSanidad('sauaipe', this)">Sauaipe</button>
-        <button class="tab-btn" onclick="filtrarSanidad('antipulgas', this)">Antipulgas</button>
+        <button class="tab-btn active" onclick="mFiltrarSanidad('todos',this)">Todos</button>
+        <button class="tab-btn" onclick="mFiltrarSanidad('brucelosis',this)">Brucelosis</button>
+        <button class="tab-btn" onclick="mFiltrarSanidad('sauaipe',this)">Sauaipe</button>
+        <button class="tab-btn" onclick="mFiltrarSanidad('antipulgas',this)">Antipulgas</button>
       </div>
-      <div class="section">
-        <div id="sanidad-alertas"></div>
-        <div class="section-title">Registros</div>
-        <div id="sanidad-list"><div class="loading">Cargando...</div></div>
-      </div>
+      <div class="section"><div id="m-sanidad-alertas"></div><div class="section-title">Registros</div><div id="m-sanidad-list"><div class="loading">Cargando...</div></div></div>
     </div>
-
-    <!-- DETALLE ANIMAL -->
-    <div id="screen-detalle" class="screen">
+    <div id="m-screen-detalle" class="screen"><div class="section" style="padding-top:16px"><div id="m-detalle-content"><div class="loading">Cargando...</div></div></div></div>
+    <div id="m-screen-nuevo-animal" class="screen">
       <div class="section" style="padding-top:16px">
-        <div id="detalle-content"><div class="loading">Cargando...</div></div>
+        <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="m-new-caravana" placeholder="AR000000000" style="font-family:var(--font-mono)"></div>
+        <div class="form-group"><label class="form-label">Sexo</label><select class="form-input" id="m-new-sexo"><option value="">Seleccionar...</option><option value="hembra">Hembra</option><option value="macho">Macho</option></select></div>
+        <div class="form-group"><label class="form-label">Raza</label><input class="form-input" type="text" id="m-new-raza" placeholder="Angus, Hereford..."></div>
+        <div class="form-group"><label class="form-label">Fecha de nacimiento</label><input class="form-input" type="date" id="m-new-fecha"></div>
+        <div class="form-group"><label class="form-label">Peso al nacer (kg)</label><input class="form-input" type="number" id="m-new-peso" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Cuadro</label><select class="form-input" id="m-new-cuadro"><option value="">Sin asignar</option></select></div>
+        <button class="btn btn-primary" onclick="guardarAnimal('m')">Guardar animal</button>
+        <button class="btn btn-secondary" onclick="mShowScreen('animales')">Cancelar</button>
+        <div id="m-nuevo-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
       </div>
     </div>
-
-    <!-- NUEVO ANIMAL -->
-    <div id="screen-nuevo-animal" class="screen">
-      <div class="section" style="padding-top:16px">
-        <div class="form-group">
-          <label class="form-label">Caravana SENASA</label>
-          <input class="form-input" type="text" id="new-caravana" placeholder="AR000000000" style="font-family:var(--font-mono)">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Sexo</label>
-          <select class="form-input" id="new-sexo">
-            <option value="">Seleccionar...</option>
-            <option value="hembra">Hembra</option>
-            <option value="macho">Macho</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Raza</label>
-          <input class="form-input" type="text" id="new-raza" placeholder="Angus, Hereford...">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Fecha de nacimiento</label>
-          <input class="form-input" type="date" id="new-fecha">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Peso al nacer (kg)</label>
-          <input class="form-input" type="number" id="new-peso" placeholder="0">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Cuadro</label>
-          <select class="form-input" id="new-cuadro">
-            <option value="">Sin asignar</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" onclick="guardarAnimal()">Guardar animal</button>
-        <button class="btn btn-secondary" onclick="goBack()">Cancelar</button>
-        <div id="nuevo-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
-      </div>
-    </div>
-
   </div>
-
   <div class="bottom-bar">
-    <button class="bar-btn active" id="bar-dashboard" onclick="showScreen('dashboard')">
-      <span class="bar-icon">⌂</span><span class="bar-label">Inicio</span>
-    </button>
-    <button class="bar-btn" id="bar-animales" onclick="showScreen('animales')">
-      <span class="bar-icon">♦</span><span class="bar-label">Animales</span>
-    </button>
-    <button class="bar-btn" id="bar-lector" onclick="showScreen('lector')">
-      <span class="bar-icon">◉</span><span class="bar-label">Lector</span>
-    </button>
-    <button class="bar-btn" id="bar-sanidad" onclick="showScreen('sanidad')">
-      <span class="bar-icon">✚</span><span class="bar-label">Sanidad</span>
-    </button>
-    <button class="bar-btn" id="bar-detalle" onclick="showScreen('detalle')" style="display:none">
-      <span class="bar-icon">≡</span><span class="bar-label">Ficha</span>
-    </button>
+    <button class="bar-btn active" id="m-bar-dashboard" onclick="mShowScreen('dashboard')"><span class="bar-icon">⌂</span><span class="bar-label">Inicio</span></button>
+    <button class="bar-btn" id="m-bar-animales" onclick="mShowScreen('animales')"><span class="bar-icon">♦</span><span class="bar-label">Animales</span></button>
+    <button class="bar-btn" id="m-bar-lector" onclick="mShowScreen('lector')"><span class="bar-icon">◉</span><span class="bar-label">Lector</span></button>
+    <button class="bar-btn" id="m-bar-sanidad" onclick="mShowScreen('sanidad')"><span class="bar-icon">✚</span><span class="bar-label">Sanidad</span></button>
+  </div>
+</div>
+
+<!-- DESKTOP -->
+<div class="desktop-app">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-title">Campo Ganadero</div><div class="sidebar-logo-sub"><span class="status-dot"></span>conectado</div></div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" id="d-nav-dashboard" onclick="dShowScreen('dashboard')"><span class="nav-icon">⌂</span>Dashboard</button>
+      <button class="nav-item" id="d-nav-animales" onclick="dShowScreen('animales')"><span class="nav-icon">♦</span>Animales</button>
+      <button class="nav-item" id="d-nav-lector" onclick="dShowScreen('lector')"><span class="nav-icon">◉</span>Lector BLE</button>
+      <button class="nav-item" id="d-nav-sanidad" onclick="dShowScreen('sanidad')"><span class="nav-icon">✚</span>Sanidad</button>
+      <button class="nav-item" id="d-nav-pariciones" onclick="dShowScreen('pariciones')"><span class="nav-icon">◈</span>Pariciones</button>
+      <button class="nav-item" id="d-nav-nuevo-animal" onclick="dShowScreen('nuevo-animal')"><span class="nav-icon">+</span>Nuevo animal</button>
+    </nav>
+    <div class="sidebar-footer">v1.0 · Supabase</div>
+  </div>
+  <div class="d-main">
+    <div class="d-topbar">
+      <div><div class="d-topbar-title" id="d-topbar-title">Dashboard</div><div class="d-topbar-sub" id="d-topbar-sub">Resumen del campo</div></div>
+      <div id="d-topbar-action"></div>
+    </div>
+    <div class="d-content">
+      <div id="d-screen-dashboard" class="d-screen active">
+        <div class="d-metrics">
+          <div class="d-metric"><div class="d-metric-val" id="d-total">—</div><div class="d-metric-label">Animales activos</div></div>
+          <div class="d-metric"><div class="d-metric-val" id="d-pariciones">—</div><div class="d-metric-label">Pariciones totales</div></div>
+          <div class="d-metric"><div class="d-metric-val" id="d-peso">—</div><div class="d-metric-label">Peso promedio (kg)</div><div class="d-metric-sub">último pesaje</div></div>
+          <div class="d-metric"><div class="d-metric-val" id="d-servicio">—</div><div class="d-metric-label">Hembras en servicio</div></div>
+        </div>
+        <div class="d-grid2">
+          <div class="d-card"><div class="d-card-title">Alertas</div><div id="d-alertas"><div class="loading">Cargando...</div></div></div>
+          <div class="d-card"><div class="d-card-title">Cuadros</div><div id="d-cuadros"><div class="loading">Cargando...</div></div></div>
+        </div>
+      </div>
+      <div id="d-screen-animales" class="d-screen">
+        <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center;flex-wrap:wrap">
+          <input class="form-input" type="search" placeholder="Buscar caravana..." id="d-search" oninput="dRenderAnimales()" style="max-width:260px">
+          <select class="form-input" id="d-filtro-sexo" onchange="dRenderAnimales()" style="max-width:140px"><option value="todos">Todos</option><option value="hembra">Hembras</option><option value="macho">Machos</option></select>
+          <button class="btn btn-primary btn-sm" onclick="dShowScreen('nuevo-animal')">+ Nuevo animal</button>
+        </div>
+        <div class="d-card" style="padding:0;overflow:hidden">
+          <table class="d-table"><thead><tr><th>Caravana</th><th>Sexo</th><th>Raza</th><th>Edad</th><th>Cuadro</th><th>Estado</th></tr></thead>
+          <tbody id="d-animales-tbody"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+      <div id="d-screen-lector" class="d-screen">
+        <div style="max-width:480px">
+          <div class="ble-card"><div class="ble-icon">⬡</div><div class="ble-title">Listo para escanear</div><div class="ble-sub">El lector escribe la caravana automáticamente en el campo de abajo</div></div>
+          <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="d-caravana-input" placeholder="AR000000000" style="font-family:var(--font-mono);font-size:18px"></div>
+          <button class="btn btn-primary" onclick="buscarCaravana('d')">Buscar animal</button>
+          <div id="d-lector-resultado" style="margin-top:16px"></div>
+        </div>
+      </div>
+      <div id="d-screen-sanidad" class="d-screen">
+        <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
+          <select class="form-input" id="d-filtro-sanidad" onchange="dRenderSanidad()" style="max-width:200px"><option value="todos">Todos los tipos</option><option value="brucelosis">Brucelosis</option><option value="sauaipe">Sauaipe</option><option value="antipulgas">Antipulgas</option></select>
+        </div>
+        <div id="d-sanidad-alertas" style="margin-bottom:16px"></div>
+        <div class="d-card" style="padding:0;overflow:hidden">
+          <table class="d-table"><thead><tr><th>Animal</th><th>Tipo</th><th>Producto</th><th>Fecha</th><th>Vencimiento</th><th>Estado</th></tr></thead>
+          <tbody id="d-sanidad-tbody"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+      <div id="d-screen-pariciones" class="d-screen">
+        <div class="d-card" style="padding:0;overflow:hidden">
+          <table class="d-table"><thead><tr><th>Madre</th><th>Cría</th><th>Fecha parto</th><th>Resultado</th><th>Observaciones</th></tr></thead>
+          <tbody id="d-pariciones-tbody"><tr><td colspan="5" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+      <div id="d-screen-detalle" class="d-screen"><div id="d-detalle-content"><div class="loading">Cargando...</div></div></div>
+      <div id="d-screen-nuevo-animal" class="d-screen">
+        <div style="max-width:540px">
+          <div class="d-card">
+            <div class="d-card-title">Datos del animal</div>
+            <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="d-new-caravana" placeholder="AR000000000" style="font-family:var(--font-mono)"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label class="form-label">Sexo</label><select class="form-input" id="d-new-sexo"><option value="">Seleccionar...</option><option value="hembra">Hembra</option><option value="macho">Macho</option></select></div>
+              <div class="form-group"><label class="form-label">Raza</label><input class="form-input" type="text" id="d-new-raza" placeholder="Angus..."></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-group"><label class="form-label">Fecha nacimiento</label><input class="form-input" type="date" id="d-new-fecha"></div>
+              <div class="form-group"><label class="form-label">Peso al nacer (kg)</label><input class="form-input" type="number" id="d-new-peso" placeholder="0"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Cuadro</label><select class="form-input" id="d-new-cuadro"><option value="">Sin asignar</option></select></div>
+            <button class="btn btn-primary" onclick="guardarAnimal('d')" style="margin-top:4px">Guardar animal</button>
+            <div id="d-nuevo-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPA_URL = 'https://cejqwdvrkpvebiysssiz.supabase.co';
-const SUPA_KEY = 'sb_publishable_r6PAogK1I3EHSy-3Cqy4bQ_SHO4fmcy';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+const sb = supabase.createClient(
+  'https://cejqwdvrkpvebiysssiz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlanF3ZHZya3B2ZWJpeXNzc2l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjUyMTYsImV4cCI6MjA5MjA0MTIxNn0.H9elvh6PP08fbG6N3lcOTt5jY0zmzbMyxbxfSvWZGXg'
+);
 
-let allAnimales = [];
-let filtroActual = 'todos';
-let allSanidad = [];
-let filtroSanidad = 'todos';
-let animalActual = null;
-let prevScreen = 'dashboard';
+let allAnimales=[],allSanidad=[],allPariciones=[],allCuadros=[];
+let mFiltroAnimal='todos',mFiltroSanidad='todos',mPrevScreen='dashboard';
 
-async function init() {
-  await loadDashboard();
-  await loadAnimales();
-  await loadSanidad();
-  await loadCuadrosSelect();
-}
+const calcEdad=f=>{const d=new Date(f),h=new Date(),m=(h.getFullYear()-d.getFullYear())*12+h.getMonth()-d.getMonth();return m<12?m+' m':Math.floor(m/12)+' años';};
+const badgeSan=v=>{if(!v)return'<span class="badge bb">OK</span>';const d=Math.ceil((new Date(v)-new Date())/86400000);return d<0?'<span class="badge br">Vencido</span>':d<=30?'<span class="badge br">Por vencer</span>':'<span class="badge bg">Vigente</span>';};
 
-async function loadDashboard() {
-  const { data: animales } = await sb.from('animales').select('id, estado, sexo, cuadro_id').eq('estado', 'activo');
-  document.getElementById('m-total').textContent = animales?.length || 0;
-
-  const { data: pariciones } = await sb.from('pariciones').select('id');
-  document.getElementById('m-pariciones').textContent = pariciones?.length || 0;
-
-  const { data: servicios } = await sb.from('servicios').select('cuadro_id').is('fecha_salida', null);
-  let enServicio = 0;
-  if (servicios?.length > 0 && animales) {
-    const cuadrosConToro = servicios.map(s => s.cuadro_id);
-    enServicio = animales.filter(a => a.sexo === 'hembra' && cuadrosConToro.includes(a.cuadro_id)).length;
-  }
-  document.getElementById('m-servicio').textContent = enServicio;
-
-  const { data: pesajes } = await sb.from('pesajes').select('peso_kg').order('fecha', { ascending: false }).limit(20);
-  if (pesajes?.length > 0) {
-    const avg = pesajes.reduce((s, p) => s + p.peso_kg, 0) / pesajes.length;
-    document.getElementById('m-peso').textContent = Math.round(avg);
-  }
-
-  const { data: brucelosis } = await sb.from('sanidad')
-    .select('animal_id, fecha_vencimiento, animales(caravana_senasa)')
-    .eq('tipo', 'brucelosis')
-    .lte('fecha_vencimiento', new Date(Date.now() + 60 * 86400000).toISOString().split('T')[0])
-    .gte('fecha_vencimiento', new Date().toISOString().split('T')[0]);
-
-  let alertsHtml = '';
-  if (brucelosis?.length > 0) {
-    const vencen30 = brucelosis.filter(b => {
-      const dias = Math.ceil((new Date(b.fecha_vencimiento) - new Date()) / 86400000);
-      return dias <= 30;
+async function loadAll(){
+  const[a,s,p,c,par]=await Promise.all([
+    sb.from('animales').select('*,cuadros(nombre)').eq('estado','activo').order('caravana_senasa'),
+    sb.from('sanidad').select('*,animales(caravana_senasa)').order('fecha',{ascending:false}).limit(100),
+    sb.from('pesajes').select('peso_kg').order('fecha',{ascending:false}).limit(30),
+    sb.from('cuadros').select('*'),
+    sb.from('pariciones').select('*,madre:animales!pariciones_madre_id_fkey(caravana_senasa),cria:animales!pariciones_cria_id_fkey(caravana_senasa)').order('fecha_parto',{ascending:false})
+  ]);
+  allAnimales=a.data||[];allSanidad=s.data||[];allCuadros=c.data||[];allPariciones=par.data||[];
+  const avgPeso=p.data?.length?Math.round(p.data.reduce((s,x)=>s+x.peso_kg,0)/p.data.length):'—';
+  const{data:srv}=await sb.from('servicios').select('cuadro_id').is('fecha_salida',null);
+  const ctoro=srv?.map(s=>s.cuadro_id)||[];
+  const enSrv=allAnimales.filter(a=>a.sexo==='hembra'&&ctoro.includes(a.cuadro_id)).length;
+  ['m','d'].forEach(p=>{
+    const el=id=>document.getElementById(p+'-'+id);
+    if(el('total'))el('total').textContent=allAnimales.length;
+    if(el('pariciones'))el('pariciones').textContent=allPariciones.length;
+    if(el('peso'))el('peso').textContent=avgPeso;
+    if(el('servicio'))el('servicio').textContent=enSrv;
+  });
+  const b30=allSanidad.filter(s=>s.tipo==='brucelosis'&&s.fecha_vencimiento&&Math.ceil((new Date(s.fecha_vencimiento)-new Date())/86400000)<=30&&Math.ceil((new Date(s.fecha_vencimiento)-new Date())/86400000)>=0);
+  const b60=allSanidad.filter(s=>s.tipo==='brucelosis'&&s.fecha_vencimiento&&Math.ceil((new Date(s.fecha_vencimiento)-new Date())/86400000)>30&&Math.ceil((new Date(s.fecha_vencimiento)-new Date())/86400000)<=60);
+  let ah='';
+  if(b30.length)ah+=`<div class="alert alert-r"><div class="alert-title">Brucelosis por vencer</div><div class="alert-sub">${b30.length} animal${b30.length>1?'es':''} en menos de 30 días</div></div>`;
+  if(b60.length)ah+=`<div class="alert alert-a"><div class="alert-title">Brucelosis — 30 a 60 días</div><div class="alert-sub">${b60.length} animal${b60.length>1?'es':''}</div></div>`;
+  if(!ah)ah='<div class="alert alert-b"><div class="alert-title">Sin alertas urgentes</div><div class="alert-sub">Todo en orden</div></div>';
+  document.getElementById('m-alertas').innerHTML=ah;
+  const dah=ah.replace(/class="alert /g,'class="d-alert ').replace(/class="alert-title"/g,'class="d-alert-title"').replace(/class="alert-sub"/g,'class="d-alert-sub"').replace(/alert-r/g,'d-alert-r').replace(/alert-a/g,'d-alert-a').replace(/alert-b/g,'d-alert-b');
+  document.getElementById('d-alertas').innerHTML=dah;
+  let ch='',dch='';
+  allCuadros.forEach(c=>{
+    const cnt=allAnimales.filter(a=>a.cuadro_id===c.id).length;
+    ch+=`<div class="list-item"><div class="avatar av-c">${c.nombre.charAt(0)}</div><div><div class="item-name">${c.nombre}</div><div class="item-sub">${c.hectareas||'—'} ha</div></div><div class="item-right"><div style="font-size:13px;font-weight:500">${cnt}</div><div class="item-meta">animales</div></div></div>`;
+    dch+=`<div class="detail-row"><span class="detail-key">${c.nombre}</span><span class="detail-val">${cnt} animales · ${c.hectareas||'—'} ha</span></div>`;
+  });
+  document.getElementById('m-cuadros').innerHTML=ch||'<div class="empty">Sin cuadros</div>';
+  document.getElementById('d-cuadros').innerHTML=dch||'<div class="empty">Sin cuadros</div>';
+  mRenderAnimales();dRenderAnimales();mRenderSanidad();dRenderSanidad();dRenderPariciones();
+  allCuadros.forEach(c=>{
+    ['m-new-cuadro','d-new-cuadro'].forEach(sid=>{
+      const sel=document.getElementById(sid);if(!sel)return;
+      const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;sel.appendChild(o);
     });
-    if (vencen30.length > 0) {
-      alertsHtml += `<div class="alert alert-r"><div class="alert-title">Brucelosis por vencer</div><div class="alert-sub">${vencen30.length} animal${vencen30.length > 1 ? 'es' : ''} vence${vencen30.length === 1 ? '' : n} en menos de 30 días</div></div>`;
-    }
-    const vencen60 = brucelosis.filter(b => {
-      const dias = Math.ceil((new Date(b.fecha_vencimiento) - new Date()) / 86400000);
-      return dias > 30 && dias <= 60;
-    });
-    if (vencen60.length > 0) {
-      alertsHtml += `<div class="alert alert-a"><div class="alert-title">Brucelosis — próximos 60 días</div><div class="alert-sub">${vencen60.length} animal${vencen60.length > 1 ? 'es' : ''} entre 30 y 60 días</div></div>`;
-    }
-  }
-  if (!alertsHtml) alertsHtml = '<div class="alert alert-b"><div class="alert-title">Sin alertas urgentes</div><div class="alert-sub">Todo en orden</div></div>';
-  document.getElementById('alertas-container').innerHTML = alertsHtml;
-
-  const { data: cuadros } = await sb.from('cuadros').select('*');
-  let cuadrosHtml = '';
-  if (cuadros?.length > 0) {
-    cuadros.forEach(c => {
-      const cant = animales?.filter(a => a.cuadro_id === c.id).length || 0;
-      cuadrosHtml += `<div class="list-item" onclick="showScreen('animales')">
-        <div class="avatar av-c">${c.nombre.charAt(0)}</div>
-        <div><div class="item-name">${c.nombre}</div><div class="item-sub">${c.hectareas || '—'} ha</div></div>
-        <div class="item-right"><div class="item-val">${cant}</div><div class="item-meta">animales</div></div>
-      </div>`;
-    });
-  } else {
-    cuadrosHtml = '<div class="empty">Sin cuadros registrados</div>';
-  }
-  document.getElementById('cuadros-list').innerHTML = cuadrosHtml;
-}
-
-async function loadAnimales() {
-  const { data } = await sb.from('animales').select('*, cuadros(nombre)').eq('estado', 'activo').order('caravana_senasa');
-  allAnimales = data || [];
-  renderAnimales();
-}
-
-function renderAnimales() {
-  let lista = allAnimales;
-  if (filtroActual !== 'todos') lista = lista.filter(a => a.sexo === filtroActual);
-  const q = document.getElementById('search-caravana')?.value?.toLowerCase();
-  if (q) lista = lista.filter(a => a.caravana_senasa.toLowerCase().includes(q));
-  let html = '';
-  if (lista.length === 0) { document.getElementById('animales-list').innerHTML = '<div class="empty">Sin resultados</div>'; return; }
-  lista.forEach(a => {
-    const av = a.sexo === 'hembra' ? 'av-h' : 'av-m';
-    const letra = a.sexo === 'hembra' ? 'H' : 'M';
-    html += `<div class="list-item" onclick="verAnimal('${a.id}')">
-      <div class="avatar ${av}">${letra}</div>
-      <div>
-        <div class="item-name">${a.caravana_senasa}</div>
-        <div class="item-sub">${a.sexo} · ${a.raza || '—'} · ${a.fecha_nacimiento ? calcEdad(a.fecha_nacimiento) : '—'}</div>
-      </div>
-      <div class="item-right">
-        <div class="item-meta">${a.cuadros?.nombre || 'Sin cuadro'}</div>
-      </div>
-    </div>`;
-  });
-  document.getElementById('animales-list').innerHTML = html;
-}
-
-function filtrarAnimales(f, btn) {
-  filtroActual = f;
-  document.querySelectorAll('#screen-animales .tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderAnimales();
-}
-
-function buscarAnimal(v) { renderAnimales(); }
-
-async function loadSanidad() {
-  const { data } = await sb.from('sanidad').select('*, animales(caravana_senasa)').order('fecha', { ascending: false }).limit(50);
-  allSanidad = data || [];
-  renderSanidad();
-}
-
-function renderSanidad() {
-  let lista = allSanidad;
-  if (filtroSanidad !== 'todos') lista = lista.filter(s => s.tipo === filtroSanidad);
-
-  const hoy = new Date();
-  const vencen = lista.filter(s => s.fecha_vencimiento && new Date(s.fecha_vencimiento) <= new Date(hoy.getTime() + 30 * 86400000));
-  let alertHtml = '';
-  if (vencen.length > 0) {
-    alertHtml = `<div class="alert alert-r"><div class="alert-title">${vencen.length} registro${vencen.length > 1 ? 's' : ''} por vencer</div><div class="alert-sub">Revisá los próximos 30 días</div></div>`;
-  }
-  document.getElementById('sanidad-alertas').innerHTML = alertHtml;
-
-  let html = '';
-  if (lista.length === 0) { document.getElementById('sanidad-list').innerHTML = '<div class="empty">Sin registros</div>'; return; }
-  lista.forEach(s => {
-    const dias = s.fecha_vencimiento ? Math.ceil((new Date(s.fecha_vencimiento) - hoy) / 86400000) : null;
-    let badge = '';
-    if (dias !== null) {
-      if (dias < 0) badge = '<span class="badge br">Vencido</span>';
-      else if (dias <= 30) badge = '<span class="badge br">Por vencer</span>';
-      else badge = '<span class="badge bg">Vigente</span>';
-    } else {
-      badge = '<span class="badge bb">OK</span>';
-    }
-    html += `<div class="list-item">
-      <div>
-        <div class="item-name">${s.tipo.charAt(0).toUpperCase() + s.tipo.slice(1)} · ${s.animales?.caravana_senasa || '—'}</div>
-        <div class="item-sub">${s.producto || ''} · ${s.fecha}</div>
-      </div>
-      <div class="item-right">${badge}</div>
-    </div>`;
-  });
-  document.getElementById('sanidad-list').innerHTML = html;
-}
-
-function filtrarSanidad(f, btn) {
-  filtroSanidad = f;
-  document.querySelectorAll('#screen-sanidad .tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderSanidad();
-}
-
-async function verAnimal(id) {
-  animalActual = id;
-  prevScreen = document.querySelector('.screen.active')?.id?.replace('screen-', '') || 'animales';
-  showScreen('detalle');
-  document.getElementById('detalle-content').innerHTML = '<div class="loading">Cargando...</div>';
-
-  const { data: a } = await sb.from('animales').select('*, cuadros(nombre)').eq('id', id).single();
-  const { data: pesajes } = await sb.from('pesajes').select('*').eq('animal_id', id).order('fecha', { ascending: false }).limit(5);
-  const { data: sanidad } = await sb.from('sanidad').select('*').eq('animal_id', id).order('fecha', { ascending: false });
-  const { data: pariciones } = await sb.from('pariciones').select('*, animales!pariciones_cria_id_fkey(caravana_senasa)').eq('madre_id', id).order('fecha_parto', { ascending: false });
-
-  const ultimoPeso = pesajes?.[0]?.peso_kg || '—';
-  const bruc = sanidad?.find(s => s.tipo === 'brucelosis');
-  const brucBadge = bruc ? (new Date(bruc.fecha_vencimiento) > new Date() ? '<span class="badge bg">Vigente</span>' : '<span class="badge br">Vencida</span>') : '<span class="badge ba">Sin registro</span>';
-  const antipar = sanidad?.find(s => s.tipo === 'sauaipe');
-  const antipBadge = antipar ? '<span class="badge bg">OK</span>' : '<span class="badge ba">Pendiente</span>';
-  const pulgas = sanidad?.find(s => s.tipo === 'antipulgas');
-  const pulgasBadge = pulgas ? '<span class="badge bg">OK</span>' : '<span class="badge ba">Pendiente</span>';
-
-  let pesajesHtml = pesajes?.length > 0 ? pesajes.map(p => `<div class="detail-row"><span class="detail-key">${p.fecha}</span><span class="detail-val">${p.peso_kg} kg</span></div>`).join('') : '<div class="empty" style="padding:12px 0">Sin pesajes</div>';
-  let paricionesHtml = '';
-  if (pariciones?.length > 0) {
-    paricionesHtml = `<div class="timeline"><div class="tl-line"></div>` + pariciones.map(p => `
-      <div class="tl-item">
-        <div class="tl-dot ok"></div>
-        <div class="tl-date">${p.fecha_parto}</div>
-        <div class="tl-desc">Parto · ${p.resultado || '—'}</div>
-        <div class="tl-sub">Cría: ${p.animales?.caravana_senasa || '—'}</div>
-      </div>`).join('') + '</div>';
-  } else {
-    paricionesHtml = '<div class="empty" style="padding:12px 0">Sin pariciones registradas</div>';
-  }
-
-  document.getElementById('detalle-content').innerHTML = `
-    <div style="text-align:center;padding:8px 0 20px">
-      <div class="avatar ${a.sexo === 'hembra' ? 'av-h' : 'av-m'}" style="width:52px;height:52px;font-size:18px;margin:0 auto 10px">${a.sexo === 'hembra' ? 'H' : 'M'}</div>
-      <div style="font-size:18px;font-weight:500;font-family:var(--font-mono)">${a.caravana_senasa}</div>
-      <div style="font-size:12px;color:var(--text2);margin-top:4px">${a.sexo} · ${a.raza || '—'} · ${a.cuadros?.nombre || 'Sin cuadro'}</div>
-    </div>
-    <div class="card">
-      <div class="card-title">Datos generales</div>
-      <div class="detail-row"><span class="detail-key">Nacimiento</span><span class="detail-val">${a.fecha_nacimiento || '—'}</span></div>
-      <div class="detail-row"><span class="detail-key">Edad</span><span class="detail-val">${a.fecha_nacimiento ? calcEdad(a.fecha_nacimiento) : '—'}</span></div>
-      <div class="detail-row"><span class="detail-key">Peso actual</span><span class="detail-val">${ultimoPeso} kg</span></div>
-      <div class="detail-row"><span class="detail-key">Estado</span><span class="detail-val">${a.estado}</span></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Sanidad</div>
-      <div class="detail-row"><span class="detail-key">Brucelosis</span>${brucBadge}</div>
-      ${bruc ? `<div class="detail-row"><span class="detail-key">Vence</span><span class="detail-val">${bruc.fecha_vencimiento}</span></div>` : ''}
-      <div class="detail-row"><span class="detail-key">Antiparasitario</span>${antipBadge}</div>
-      <div class="detail-row"><span class="detail-key">Antipulgas</span>${pulgasBadge}</div>
-    </div>
-    <div class="card">
-      <div class="card-title">Pesajes</div>
-      ${pesajesHtml}
-    </div>
-    ${a.sexo === 'hembra' ? `<div class="card"><div class="card-title">Pariciones</div>${paricionesHtml}</div>` : ''}
-    <button class="btn btn-secondary" onclick="goBack()" style="margin-top:4px">← Volver</button>
-  `;
-}
-
-function onCaravanaInput(v) {
-  document.getElementById('scan-box').classList.remove('visible');
-}
-
-async function buscarPorCaravana() {
-  const v = document.getElementById('caravana-input').value.trim().replace(/\s/g, '');
-  if (!v) return;
-  const { data } = await sb.from('animales').select('*').ilike('caravana_senasa', v).single();
-  const el = document.getElementById('lector-resultado');
-  if (data) {
-    el.innerHTML = `<div class="alert alert-b">
-      <div class="alert-title">${data.caravana_senasa}</div>
-      <div class="alert-sub">${data.sexo} · ${data.raza || '—'} · ${data.estado}</div>
-    </div>
-    <button class="btn btn-primary" onclick="verAnimal('${data.id}')">Ver ficha completa</button>`;
-  } else {
-    el.innerHTML = `<div class="alert alert-a">
-      <div class="alert-title">Animal no encontrado</div>
-      <div class="alert-sub">Caravana ${v} no está en el sistema</div>
-    </div>
-    <button class="btn btn-secondary" onclick="document.getElementById('new-caravana').value='${v}';showScreen('nuevo-animal')">Registrar este animal</button>`;
-  }
-}
-
-async function loadCuadrosSelect() {
-  const { data } = await sb.from('cuadros').select('*');
-  const sel = document.getElementById('new-cuadro');
-  data?.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id; opt.textContent = c.nombre;
-    sel.appendChild(opt);
   });
 }
 
-async function guardarAnimal() {
-  const caravana = document.getElementById('new-caravana').value.trim();
-  const sexo = document.getElementById('new-sexo').value;
-  const raza = document.getElementById('new-raza').value;
-  const fecha = document.getElementById('new-fecha').value;
-  const peso = document.getElementById('new-peso').value;
-  const cuadro = document.getElementById('new-cuadro').value;
-  const msg = document.getElementById('nuevo-msg');
-  if (!caravana || !sexo) { msg.textContent = 'Caravana y sexo son obligatorios'; msg.style.color = 'var(--red)'; return; }
-  const { error } = await sb.from('animales').insert({
-    caravana_senasa: caravana.replace(/\s/g, ''),
-    sexo, raza: raza || null,
-    fecha_nacimiento: fecha || null,
-    peso_nacimiento: peso ? parseFloat(peso) : null,
-    cuadro_id: cuadro || null,
-    estado: 'activo'
-  });
-  if (error) { msg.textContent = 'Error: ' + error.message; msg.style.color = 'var(--red)'; return; }
-  msg.textContent = 'Animal guardado correctamente'; msg.style.color = 'var(--green)';
-  await loadAnimales();
-  await loadDashboard();
-  setTimeout(() => showScreen('animales'), 1200);
+function mRenderAnimales(){
+  let l=allAnimales;
+  if(mFiltroAnimal!=='todos')l=l.filter(a=>a.sexo===mFiltroAnimal);
+  const q=document.getElementById('m-search')?.value?.toLowerCase();
+  if(q)l=l.filter(a=>a.caravana_senasa.toLowerCase().includes(q));
+  document.getElementById('m-animales-list').innerHTML=l.length?l.map(a=>`<div class="list-item" onclick="verAnimal('${a.id}','m')"><div class="avatar ${a.sexo==='hembra'?'av-h':'av-m'}">${a.sexo==='hembra'?'H':'M'}</div><div><div class="item-name">${a.caravana_senasa}</div><div class="item-sub">${a.sexo} · ${a.raza||'—'} · ${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</div></div><div class="item-right"><div class="item-meta">${a.cuadros?.nombre||'Sin cuadro'}</div></div></div>`).join(''):'<div class="empty">Sin resultados</div>';
 }
 
-function calcEdad(fecha) {
-  const d = new Date(fecha), hoy = new Date();
-  const meses = (hoy.getFullYear() - d.getFullYear()) * 12 + hoy.getMonth() - d.getMonth();
-  if (meses < 12) return meses + ' meses';
-  return Math.floor(meses / 12) + ' años';
+function dRenderAnimales(){
+  let l=allAnimales;
+  const q=document.getElementById('d-search')?.value?.toLowerCase();
+  const f=document.getElementById('d-filtro-sexo')?.value;
+  if(f&&f!=='todos')l=l.filter(a=>a.sexo===f);
+  if(q)l=l.filter(a=>a.caravana_senasa.toLowerCase().includes(q));
+  document.getElementById('d-animales-tbody').innerHTML=l.length?l.map(a=>`<tr onclick="verAnimal('${a.id}','d')"><td class="mono">${a.caravana_senasa}</td><td>${a.sexo}</td><td>${a.raza||'—'}</td><td>${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</td><td>${a.cuadros?.nombre||'Sin cuadro'}</td><td><span class="badge bg">${a.estado}</span></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Sin resultados</td></tr>';
 }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id)?.classList.add('active');
-  document.querySelectorAll('.bar-btn').forEach(b => b.classList.remove('active'));
-  const barMap = { dashboard: 'bar-dashboard', animales: 'bar-animales', lector: 'bar-lector', sanidad: 'bar-sanidad', detalle: 'bar-detalle' };
-  if (barMap[id]) document.getElementById(barMap[id])?.classList.add('active');
-  const titles = { dashboard: 'Mi campo', animales: 'Animales', lector: 'Lector BLE', sanidad: 'Sanidad', detalle: 'Ficha animal', 'nuevo-animal': 'Nuevo animal' };
-  document.getElementById('topbar-title').textContent = titles[id] || '';
-  document.getElementById('topbar-action').innerHTML = id === 'animales' ? '<button class="header-action" onclick="showScreen(\'nuevo-animal\')">+ Nuevo</button>' : id === 'sanidad' ? '<button class="header-action">+ Registrar</button>' : '';
+function mFiltrar(f,btn){mFiltroAnimal=f;document.querySelectorAll('#m-screen-animales .tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mRenderAnimales();}
+
+function mRenderSanidad(){
+  let l=allSanidad;
+  if(mFiltroSanidad!=='todos')l=l.filter(s=>s.tipo===mFiltroSanidad);
+  const v=l.filter(s=>s.fecha_vencimiento&&Math.ceil((new Date(s.fecha_vencimiento)-new Date())/86400000)<=30);
+  document.getElementById('m-sanidad-alertas').innerHTML=v.length?`<div class="alert alert-r"><div class="alert-title">${v.length} registro${v.length>1?'s':''} por vencer</div><div class="alert-sub">Próximos 30 días</div></div>`:'';
+  document.getElementById('m-sanidad-list').innerHTML=l.length?l.map(s=>`<div class="list-item"><div><div class="item-name">${s.tipo.charAt(0).toUpperCase()+s.tipo.slice(1)} · ${s.animales?.caravana_senasa||'—'}</div><div class="item-sub">${s.producto||''} · ${s.fecha}</div></div><div class="item-right">${badgeSan(s.fecha_vencimiento)}</div></div>`).join(''):'<div class="empty">Sin registros</div>';
 }
 
-function goBack() { showScreen(prevScreen); }
+function dRenderSanidad(){
+  let l=allSanidad;
+  const f=document.getElementById('d-filtro-sanidad')?.value;
+  if(f&&f!=='todos')l=l.filter(s=>s.tipo===f);
+  const v=l.filter(s=>s.fecha_vencimiento&&Math.ceil((new Date(s.fecha_vencimiento)-new Date())/86400000)<=30);
+  document.getElementById('d-sanidad-alertas').innerHTML=v.length?`<div class="d-alert d-alert-r"><div class="d-alert-title">${v.length} registro${v.length>1?'s':''} por vencer en 30 días</div></div>`:'';
+  document.getElementById('d-sanidad-tbody').innerHTML=l.length?l.map(s=>`<tr><td class="mono">${s.animales?.caravana_senasa||'—'}</td><td>${s.tipo}</td><td>${s.producto||'—'}</td><td class="mono">${s.fecha}</td><td class="mono">${s.fecha_vencimiento||'—'}</td><td>${badgeSan(s.fecha_vencimiento)}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">Sin registros</td></tr>';
+}
 
-init();
+function mFiltrarSanidad(f,btn){mFiltroSanidad=f;document.querySelectorAll('#m-screen-sanidad .tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mRenderSanidad();}
+
+function dRenderPariciones(){
+  document.getElementById('d-pariciones-tbody').innerHTML=allPariciones.length?allPariciones.map(p=>`<tr><td class="mono">${p.madre?.caravana_senasa||'—'}</td><td class="mono">${p.cria?.caravana_senasa||'—'}</td><td class="mono">${p.fecha_parto}</td><td>${p.resultado||'—'}</td><td>${p.observaciones||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">Sin pariciones registradas</td></tr>';
+}
+
+async function verAnimal(id,ctx){
+  if(ctx==='m'){mPrevScreen=document.querySelector('#m-screen-animales.active')?'animales':'dashboard';mShowScreen('detalle');document.getElementById('m-detalle-content').innerHTML='<div class="loading">Cargando...</div>';}
+  else{dShowScreen('detalle');document.getElementById('d-detalle-content').innerHTML='<div class="loading">Cargando...</div>';}
+  const[{data:a},{data:ps},{data:san},{data:par}]=await Promise.all([
+    sb.from('animales').select('*,cuadros(nombre)').eq('id',id).single(),
+    sb.from('pesajes').select('*').eq('animal_id',id).order('fecha',{ascending:false}).limit(5),
+    sb.from('sanidad').select('*').eq('animal_id',id).order('fecha',{ascending:false}),
+    sb.from('pariciones').select('*,cria:animales!pariciones_cria_id_fkey(caravana_senasa)').eq('madre_id',id).order('fecha_parto',{ascending:false})
+  ]);
+  const bruc=san?.find(s=>s.tipo==='brucelosis');
+  const phm=ps?.length?ps.map(p=>`<div class="detail-row"><span class="detail-key">${p.fecha}</span><span class="detail-val">${p.peso_kg} kg</span></div>`).join(''):'<div class="empty" style="padding:10px 0">Sin pesajes</div>';
+  const parh=par?.length?`<div class="timeline"><div class="tl-line"></div>${par.map(p=>`<div class="tl-item"><div class="tl-dot ok"></div><div class="tl-date">${p.fecha_parto}</div><div class="tl-desc">${p.resultado||'Parto'}</div><div class="tl-sub">Cría: ${p.cria?.caravana_senasa||'—'}</div></div>`).join('')}</div>`:'<div class="empty" style="padding:10px 0">Sin pariciones</div>';
+  const html=`<div style="text-align:center;padding:8px 0 20px"><div class="avatar ${a.sexo==='hembra'?'av-h':'av-m'}" style="width:52px;height:52px;font-size:18px;margin:0 auto 10px">${a.sexo==='hembra'?'H':'M'}</div><div style="font-size:18px;font-weight:500;font-family:var(--font-mono)">${a.caravana_senasa}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${a.sexo} · ${a.raza||'—'} · ${a.cuadros?.nombre||'Sin cuadro'}</div></div>
+  <div class="card"><div class="card-title">Datos generales</div>
+    <div class="detail-row"><span class="detail-key">Nacimiento</span><span class="detail-val">${a.fecha_nacimiento||'—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Edad</span><span class="detail-val">${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Último peso</span><span class="detail-val">${ps?.[0]?.peso_kg||'—'} kg</span></div>
+  </div>
+  <div class="card"><div class="card-title">Sanidad</div>
+    <div class="detail-row"><span class="detail-key">Brucelosis</span>${bruc?badgeSan(bruc.fecha_vencimiento):'<span class="badge ba">Sin registro</span>'}</div>
+    ${bruc?`<div class="detail-row"><span class="detail-key">Vence</span><span class="detail-val">${bruc.fecha_vencimiento}</span></div>`:''}
+    <div class="detail-row"><span class="detail-key">Antiparasitario</span>${san?.find(s=>s.tipo==='sauaipe')?'<span class="badge bg">OK</span>':'<span class="badge ba">Pendiente</span>'}</div>
+    <div class="detail-row"><span class="detail-key">Antipulgas</span>${san?.find(s=>s.tipo==='antipulgas')?'<span class="badge bg">OK</span>':'<span class="badge ba">Pendiente</span>'}</div>
+  </div>
+  <div class="card"><div class="card-title">Pesajes</div>${phm}</div>
+  ${a.sexo==='hembra'?`<div class="card"><div class="card-title">Pariciones</div>${parh}</div>`:''}
+  <button class="btn btn-secondary" onclick="${ctx==='m'?`mShowScreen('${mPrevScreen}')`:`dShowScreen('animales')`}" style="margin-top:4px">← Volver</button>`;
+  document.getElementById(ctx==='m'?'m-detalle-content':'d-detalle-content').innerHTML=html;
+}
+
+async function buscarCaravana(ctx){
+  const v=document.getElementById(ctx+'-caravana-input').value.trim().replace(/\s/g,'');
+  if(!v)return;
+  const{data}=await sb.from('animales').select('*').ilike('caravana_senasa',v).maybeSingle();
+  const el=document.getElementById(ctx+'-lector-resultado');
+  if(data)el.innerHTML=`<div class="alert alert-b"><div class="alert-title">${data.caravana_senasa}</div><div class="alert-sub">${data.sexo} · ${data.raza||'—'} · ${data.estado}</div></div><button class="btn btn-primary" onclick="verAnimal('${data.id}','${ctx}')">Ver ficha</button>`;
+  else el.innerHTML=`<div class="alert alert-a"><div class="alert-title">No encontrado</div><div class="alert-sub">${v} no está en el sistema</div></div><button class="btn btn-secondary" onclick="document.getElementById('${ctx}-new-caravana').value='${v}';${ctx==='m'?`mShowScreen('nuevo-animal')`:`dShowScreen('nuevo-animal')`}">Registrar animal</button>`;
+}
+
+async function guardarAnimal(ctx){
+  const g=id=>document.getElementById(ctx+'-new-'+id)?.value;
+  const caravana=g('caravana')?.trim(),sexo=g('sexo');
+  const msg=document.getElementById(ctx+'-nuevo-msg');
+  if(!caravana||!sexo){msg.textContent='Caravana y sexo son obligatorios';msg.style.color='var(--red)';return;}
+  const{error}=await sb.from('animales').insert({caravana_senasa:caravana.replace(/\s/g,''),sexo,raza:g('raza')||null,fecha_nacimiento:g('fecha')||null,peso_nacimiento:g('peso')?parseFloat(g('peso')):null,cuadro_id:g('cuadro')||null,estado:'activo'});
+  if(error){msg.textContent='Error: '+error.message;msg.style.color='var(--red)';return;}
+  msg.textContent='Animal guardado';msg.style.color='var(--green)';
+  await loadAll();
+  setTimeout(()=>ctx==='m'?mShowScreen('animales'):dShowScreen('animales'),1200);
+}
+
+function mShowScreen(id){
+  document.querySelectorAll('.mobile-app .screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('m-screen-'+id)?.classList.add('active');
+  document.querySelectorAll('.bar-btn').forEach(b=>b.classList.remove('active'));
+  const bar={dashboard:'m-bar-dashboard',animales:'m-bar-animales',lector:'m-bar-lector',sanidad:'m-bar-sanidad'};
+  if(bar[id])document.getElementById(bar[id])?.classList.add('active');
+  const t={dashboard:'Mi campo',animales:'Animales',lector:'Lector BLE',sanidad:'Sanidad',detalle:'Ficha animal','nuevo-animal':'Nuevo animal'};
+  document.getElementById('m-topbar-title').textContent=t[id]||'';
+  document.getElementById('m-topbar-action').innerHTML=id==='animales'?'<button class="header-action" onclick="mShowScreen(\'nuevo-animal\')">+ Nuevo</button>':'';
+}
+
+function dShowScreen(id){
+  document.querySelectorAll('.d-screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('d-screen-'+id)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('d-nav-'+id)?.classList.add('active');
+  const t={dashboard:'Dashboard',animales:'Animales',lector:'Lector BLE',sanidad:'Sanidad',pariciones:'Pariciones',detalle:'Ficha animal','nuevo-animal':'Nuevo animal'};
+  const s={dashboard:'Resumen del campo',animales:'Todos los animales activos',lector:'Escaneá caravanas con el lector BLE',sanidad:'Registros sanitarios',pariciones:'Historial de partos','nuevo-animal':'Registrar un nuevo animal'};
+  document.getElementById('d-topbar-title').textContent=t[id]||'';
+  document.getElementById('d-topbar-sub').textContent=s[id]||'';
+  if(id==='sanidad')dRenderSanidad();
+  if(id==='pariciones')dRenderPariciones();
+}
+
+loadAll();
 </script>
 </body>
 </html>
