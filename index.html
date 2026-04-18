@@ -185,6 +185,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
       </div>
       <div class="section">
         <div class="section-title">Alertas</div><div id="m-alertas"></div>
+        <div class="section-title">Categorías</div><div id="m-categorias"></div>
         <div class="section-title">Cuadros <button class="btn-add" onclick="abrirModalCuadro()">+ Nuevo</button></div>
         <div id="m-cuadros"></div>
       </div>
@@ -277,6 +278,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
           <div class="d-card"><div class="d-card-title">Alertas</div><div id="d-alertas"><div class="loading">Cargando...</div></div></div>
           <div class="d-card"><div class="d-card-title" style="display:flex;justify-content:space-between;align-items:center">Cuadros <button class="btn-add" onclick="abrirModalCuadro()">+ Nuevo</button></div><div id="d-cuadros"><div class="loading">Cargando...</div></div></div>
         </div>
+        <div class="d-card" style="margin-top:20px"><div class="d-card-title">Animales por categoría</div><div id="d-categorias"><div class="loading">Cargando...</div></div></div>
       </div>
 
       <div id="d-screen-animales" class="d-screen">
@@ -453,6 +455,21 @@ async function loadAll(){
   document.getElementById('m-cuadros').innerHTML=ch||'<div class="empty">Sin cuadros registrados</div>';
   document.getElementById('d-cuadros').innerHTML=dch||'<div class="empty">Sin cuadros registrados</div>';
   
+  const cats=['ternera','ternero','vaquillona','vaca','novillito','novillo','toro'];
+  const catCounts={};
+  cats.forEach(c=>catCounts[c]=0);
+  allAnimales.forEach(a=>{const c=calcCategoria(a);if(catCounts[c]!==undefined)catCounts[c]++;});
+  const catColores={ternera:'bb',ternero:'bb',vaquillona:'ba',novillito:'ba',vaca:'bg',novillo:'bg',toro:'br'};
+  let mCatH='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  let dCatH='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:12px">';
+  cats.forEach(c=>{
+    mCatH+=`<div class="metric" style="padding:12px"><div class="metric-val" style="font-size:22px">${catCounts[c]}</div><div class="metric-label" style="text-transform:capitalize">${c}</div></div>`;
+    dCatH+=`<div style="background:var(--bg3);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:28px;font-weight:300;line-height:1;margin-bottom:4px">${catCounts[c]}</div><div style="font-size:11px;color:var(--text2);text-transform:capitalize">${c}</div></div>`;
+  });
+  mCatH+='</div>';dCatH+='</div>';
+  document.getElementById('m-categorias').innerHTML=mCatH;
+  document.getElementById('d-categorias').innerHTML=dCatH;
+  
   mRenderAnimales();dRenderAnimales();mRenderSanidad();dRenderSanidad();dRenderPariciones();dRenderCuadros();dRenderPesajes();dRenderServicios();
   llenarSelects();
 }
@@ -514,7 +531,7 @@ function dRenderSanidad(){
 function mFiltrarSanidad(f,btn){mFiltroSanidad=f;document.querySelectorAll('#m-screen-sanidad .tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mRenderSanidad();}
 
 function dRenderPariciones(){
-  document.getElementById('d-pariciones-tbody').innerHTML=allPariciones.length?allPariciones.map(p=>`<tr><td class="mono">${p.madre?.caravana_senasa||'—'}</td><td class="mono">${p.cria?.caravana_senasa||'—'}</td><td class="mono">${p.fecha_parto}</td><td>${p.resultado||'—'}</td><td>${p.observaciones||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">Sin pariciones registradas</td></tr>';
+  document.getElementById('d-pariciones-tbody').innerHTML=allPariciones.length?allPariciones.map(p=>`<tr onclick="abrirModalEditarParicion('${p.id}')"><td class="mono">${p.madre?.caravana_senasa||'—'}</td><td class="mono">${p.cria?.caravana_senasa||'—'}</td><td class="mono">${p.fecha_parto}</td><td>${p.resultado||'—'}</td><td>${p.observaciones||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">Sin pariciones registradas</td></tr>';
 }
 
 function dRenderCuadros(){
@@ -543,7 +560,7 @@ async function verAnimal(id,ctx){
   ]);
   const bruc=san?.find(s=>s.tipo==='brucelosis');
   const phm=ps?.length?ps.map(p=>`<div class="detail-row"><span class="detail-key">${p.fecha}</span><span class="detail-val">${p.peso_kg} kg</span></div>`).join(''):'<div class="empty" style="padding:10px 0">Sin pesajes</div>';
-  const parh=par?.length?`<div class="timeline"><div class="tl-line"></div>${par.map(p=>`<div class="tl-item"><div class="tl-dot ok"></div><div class="tl-date">${p.fecha_parto}</div><div class="tl-desc">${p.resultado||'Parto'}</div><div class="tl-sub">Cría: ${p.cria?.caravana_senasa||'—'}</div></div>`).join('')}</div>`:'<div class="empty" style="padding:10px 0">Sin pariciones</div>';
+  const parh=par?.length?`<div class="timeline"><div class="tl-line"></div>${par.map(p=>`<div class="tl-item" onclick="abrirModalEditarParicion('${p.id}')" style="cursor:pointer"><div class="tl-dot ok"></div><div class="tl-date">${p.fecha_parto}</div><div class="tl-desc">${p.resultado||'Parto'}</div><div class="tl-sub">Cría: ${p.cria?.caravana_senasa||'—'}</div></div>`).join('')}</div>`:'<div class="empty" style="padding:10px 0">Sin pariciones</div>';
   const html=`<div style="text-align:center;padding:8px 0 20px"><div class="avatar ${a.sexo==='hembra'?'av-h':'av-m'}" style="width:52px;height:52px;font-size:18px;margin:0 auto 10px">${a.sexo==='hembra'?'H':'M'}</div><div style="font-size:18px;font-weight:500;font-family:var(--font-mono)">${a.caravana_senasa}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${categoriaBadge(a)} · ${a.raza||'—'} · ${a.cuadros?.nombre||'Sin cuadro'}</div></div>
   <div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Datos generales <button class="btn-add" onclick="abrirModalEditarAnimal('${a.id}')">Editar</button></div>
     <div class="detail-row"><span class="detail-key">Categoría</span><span>${categoriaBadge(a)}</span></div>
@@ -721,6 +738,53 @@ async function guardarParicion(){
   });
   if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
   msg.textContent='Parición guardada';msg.className='msg-ok';
+  await loadAll();
+  setTimeout(closeModal,800);
+}
+
+function abrirModalEditarParicion(id){
+  const p=allPariciones.find(x=>x.id===id);
+  if(!p)return;
+  const hembras=allAnimales.filter(a=>a.sexo==='hembra');
+  openModal(`
+    <div class="modal-title">Editar parición</div>
+    <div class="form-group"><label class="form-label">Madre</label><select class="form-input" id="mod-madre">${hembras.map(a=>`<option value="${a.id}" ${a.id===p.madre_id?'selected':''}>${a.caravana_senasa}</option>`).join('')}</select></div>
+    <div class="row2">
+      <div class="form-group"><label class="form-label">Fecha parto</label><input class="form-input" type="date" id="mod-fecha" value="${p.fecha_parto}"></div>
+      <div class="form-group"><label class="form-label">Resultado</label><select class="form-input" id="mod-resultado"><option value="vivo" ${p.resultado==='vivo'?'selected':''}>Vivo</option><option value="muerto" ${p.resultado==='muerto'?'selected':''}>Muerto</option><option value="gemelar" ${p.resultado==='gemelar'?'selected':''}>Gemelar</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Cría (opcional)</label><select class="form-input" id="mod-cria"><option value="">No vinculada</option>${allAnimales.map(a=>`<option value="${a.id}" ${a.id===p.cria_id?'selected':''}>${a.caravana_senasa}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-input" id="mod-obs">${p.observaciones||''}</textarea></div>
+    <button class="btn btn-primary" onclick="actualizarParicion('${id}')">Guardar cambios</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn" style="background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,0.3);margin-top:20px" onclick="eliminarParicion('${id}')">Eliminar parición</button>
+    <div id="mod-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
+  `);
+}
+
+async function actualizarParicion(id){
+  const msg=document.getElementById('mod-msg');
+  const madre_id=document.getElementById('mod-madre').value;
+  const fecha_parto=document.getElementById('mod-fecha').value;
+  if(!madre_id||!fecha_parto){msg.textContent='Madre y fecha son obligatorios';msg.className='msg-err';return;}
+  const{error}=await sb.from('pariciones').update({
+    madre_id,fecha_parto,
+    cria_id:document.getElementById('mod-cria').value||null,
+    resultado:document.getElementById('mod-resultado').value,
+    observaciones:document.getElementById('mod-obs').value||null
+  }).eq('id',id);
+  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
+  msg.textContent='Parición actualizada';msg.className='msg-ok';
+  await loadAll();
+  setTimeout(closeModal,800);
+}
+
+async function eliminarParicion(id){
+  if(!confirm('¿Eliminar esta parición? No se puede deshacer.'))return;
+  const msg=document.getElementById('mod-msg');
+  const{error}=await sb.from('pariciones').delete().eq('id',id);
+  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
+  msg.textContent='Parición eliminada';msg.className='msg-ok';
   await loadAll();
   setTimeout(closeModal,800);
 }
