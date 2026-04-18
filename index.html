@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f0f0f">
-<title>Estancia Cancahuel</title>
+<title>Campo Ganadero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -31,6 +31,11 @@ input,select,textarea{font-family:var(--font);font-size:14px;}
 .topbar-title{font-size:15px;font-weight:500;}
 .topbar-sub{font-size:11px;color:var(--text2);margin-top:1px;font-family:var(--font-mono);}
 .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;}
+.status-dot.offline{background:var(--amber);}
+.status-dot.syncing{background:var(--blue);animation:pulse 1s infinite;}
+.status-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.pending-badge{background:var(--amber-bg);color:var(--amber);font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px;font-weight:500;}
 .m-content{flex:1;overflow-y:auto;padding-bottom:80px;}
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-top:1px solid var(--border);padding:8px 0 20px;z-index:10;}
 .bar-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;}
@@ -172,7 +177,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
 <!-- MOBILE -->
 <div class="mobile-app">
   <div class="topbar">
-    <div><div class="topbar-title" id="m-topbar-title">Mi campo</div><div class="topbar-sub"><span class="status-dot"></span>conectado</div></div>
+    <div><div class="topbar-title" id="m-topbar-title">Mi campo</div><div class="topbar-sub" id="m-status-text"><span class="status-dot" id="m-status-dot"></span>conectado</div></div>
     <div id="m-topbar-action"></div>
   </div>
   <div class="m-content">
@@ -245,7 +250,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
 <!-- DESKTOP -->
 <div class="desktop-app">
   <div class="sidebar">
-    <div class="sidebar-logo"><div class="sidebar-logo-title">Campo Ganadero</div><div class="sidebar-logo-sub"><span class="status-dot"></span>conectado</div></div>
+    <div class="sidebar-logo"><div class="sidebar-logo-title">Campo Ganadero</div><div class="sidebar-logo-sub" id="d-status-text"><span class="status-dot" id="d-status-dot"></span>conectado</div></div>
     <nav class="sidebar-nav">
       <button class="nav-item active" id="d-nav-dashboard" onclick="dShowScreen('dashboard')"><span class="nav-icon">⌂</span>Dashboard</button>
       <button class="nav-item" id="d-nav-animales" onclick="dShowScreen('animales')"><span class="nav-icon">♦</span>Animales</button>
@@ -384,11 +389,199 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js"></script>
 <script>
 const sb = supabase.createClient(
   'https://cejqwdvrkpvebiysssiz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlanF3ZHZya3B2ZWJpeXNzc2l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjUyMTYsImV4cCI6MjA5MjA0MTIxNn0.H9elvh6PP08fbG6N3lcOTt5jY0zmzbMyxbxfSvWZGXg'
 );
+
+// ========== REGISTRO SERVICE WORKER ==========
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').catch(e => console.log('SW error:', e));
+}
+
+// ========== BASE DE DATOS LOCAL (IndexedDB via Dexie) ==========
+const db = new Dexie('CampoGanaderoDB');
+db.version(1).stores({
+  animales: 'id, caravana_senasa, sexo, estado, cuadro_id',
+  cuadros: 'id, nombre',
+  pesajes: 'id, animal_id, fecha',
+  sanidad: 'id, animal_id, tipo, fecha, fecha_vencimiento',
+  pariciones: 'id, madre_id, cria_id, fecha_parto',
+  servicios: 'id, toro_id, cuadro_id',
+  pending_ops: '++id, timestamp, type, table, data'
+});
+
+// ========== ESTADO DE CONEXIÓN ==========
+let isOnline = navigator.onLine;
+let isSyncing = false;
+
+function updateStatusUI() {
+  const pending = pendingCount;
+  ['m','d'].forEach(p => {
+    const dot = document.getElementById(p+'-status-dot');
+    const txt = document.getElementById(p+'-status-text');
+    if (!dot || !txt) return;
+    dot.className = 'status-dot';
+    let label = 'conectado';
+    if (isSyncing) { dot.classList.add('syncing'); label = 'sincronizando...'; }
+    else if (!isOnline) { dot.classList.add('offline'); label = 'offline'; }
+    if (pending > 0) label += ` · ${pending} pendiente${pending>1?'s':''}`;
+    txt.innerHTML = '<span class="status-dot ' + dot.className.replace('status-dot','').trim() + '"></span>' + label;
+  });
+}
+
+let pendingCount = 0;
+async function updatePendingCount() {
+  pendingCount = await db.pending_ops.count();
+  updateStatusUI();
+}
+
+window.addEventListener('online', async () => { isOnline = true; updateStatusUI(); await syncPending(); await fullSync(); });
+window.addEventListener('offline', () => { isOnline = false; updateStatusUI(); });
+
+// ========== SINCRONIZACIÓN DE DATOS (remoto → local) ==========
+async function fullSync() {
+  if (!isOnline) return;
+  isSyncing = true; updateStatusUI();
+  try {
+    const [a,c,p,s,pa,sv] = await Promise.all([
+      sb.from('animales').select('*'),
+      sb.from('cuadros').select('*'),
+      sb.from('pesajes').select('*'),
+      sb.from('sanidad').select('*'),
+      sb.from('pariciones').select('*'),
+      sb.from('servicios').select('*')
+    ]);
+    if (a.data) { await db.animales.clear(); await db.animales.bulkPut(a.data); }
+    if (c.data) { await db.cuadros.clear(); await db.cuadros.bulkPut(c.data); }
+    if (p.data) { await db.pesajes.clear(); await db.pesajes.bulkPut(p.data); }
+    if (s.data) { await db.sanidad.clear(); await db.sanidad.bulkPut(s.data); }
+    if (pa.data) { await db.pariciones.clear(); await db.pariciones.bulkPut(pa.data); }
+    if (sv.data) { await db.servicios.clear(); await db.servicios.bulkPut(sv.data); }
+  } catch(e) { console.log('Sync error:', e); }
+  isSyncing = false; updateStatusUI();
+}
+
+// ========== COLA DE OPERACIONES OFFLINE ==========
+function generateTempId() {
+  return 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2,9);
+}
+
+async function queueOp(type, table, data, id = null) {
+  await db.pending_ops.add({ timestamp: Date.now(), type, table, data, record_id: id });
+  await updatePendingCount();
+}
+
+async function syncPending() {
+  if (!isOnline) return;
+  const ops = await db.pending_ops.orderBy('timestamp').toArray();
+  if (ops.length === 0) return;
+  
+  isSyncing = true; updateStatusUI();
+  const idMap = {};
+  
+  for (const op of ops) {
+    try {
+      const data = { ...op.data };
+      Object.keys(data).forEach(k => {
+        if (typeof data[k] === 'string' && data[k].startsWith('temp_') && idMap[data[k]]) {
+          data[k] = idMap[data[k]];
+        }
+      });
+      
+      if (op.type === 'insert') {
+        const tempId = data.id;
+        delete data.id;
+        const { data: inserted, error } = await sb.from(op.table).insert(data).select().single();
+        if (error) throw error;
+        if (tempId && tempId.startsWith('temp_')) {
+          idMap[tempId] = inserted.id;
+          await db[op.table].delete(tempId);
+          await db[op.table].put(inserted);
+        }
+      } else if (op.type === 'update') {
+        const id = idMap[op.record_id] || op.record_id;
+        delete data.id;
+        const { error } = await sb.from(op.table).update(data).eq('id', id);
+        if (error) throw error;
+      } else if (op.type === 'delete') {
+        const id = idMap[op.record_id] || op.record_id;
+        const { error } = await sb.from(op.table).delete().eq('id', id);
+        if (error) throw error;
+      }
+      await db.pending_ops.delete(op.id);
+    } catch(e) {
+      console.log('Sync op failed:', op, e);
+      break;
+    }
+  }
+  
+  await updatePendingCount();
+  isSyncing = false;
+  await fullSync();
+  if (typeof loadAll === 'function') await loadAll();
+}
+
+// ========== API UNIFICADA (offline-first) ==========
+async function dbInsert(table, data) {
+  const tempId = generateTempId();
+  const record = { id: tempId, ...data, created_at: new Date().toISOString() };
+  await db[table].put(record);
+  
+  if (isOnline) {
+    try {
+      delete data.id;
+      const { data: inserted, error } = await sb.from(table).insert(data).select().single();
+      if (error) throw error;
+      await db[table].delete(tempId);
+      await db[table].put(inserted);
+      return inserted;
+    } catch(e) {
+      await queueOp('insert', table, record, tempId);
+      return record;
+    }
+  } else {
+    await queueOp('insert', table, record, tempId);
+    return record;
+  }
+}
+
+async function dbUpdate(table, id, data) {
+  const existing = await db[table].get(id);
+  if (existing) await db[table].put({ ...existing, ...data });
+  
+  if (isOnline && !id.startsWith('temp_')) {
+    try {
+      const { error } = await sb.from(table).update(data).eq('id', id);
+      if (error) throw error;
+    } catch(e) {
+      await queueOp('update', table, data, id);
+    }
+  } else {
+    await queueOp('update', table, data, id);
+  }
+}
+
+async function dbDelete(table, id) {
+  await db[table].delete(id);
+  
+  if (isOnline && !id.startsWith('temp_')) {
+    try {
+      const { error } = await sb.from(table).delete().eq('id', id);
+      if (error) throw error;
+    } catch(e) {
+      await queueOp('delete', table, {}, id);
+    }
+  } else if (id.startsWith('temp_')) {
+    const pending = await db.pending_ops.where('record_id').equals(id).toArray();
+    for (const p of pending) await db.pending_ops.delete(p.id);
+    await updatePendingCount();
+  } else {
+    await queueOp('delete', table, {}, id);
+  }
+}
 
 let allAnimales=[],allSanidad=[],allPariciones=[],allCuadros=[],allPesajes=[],allServicios=[];
 let mFiltroAnimal='todos',mFiltroSanidad='todos',mPrevScreen='dashboard';
@@ -414,17 +607,45 @@ const categoriaBadge=(animal)=>{
 const badgeSan=v=>{if(!v)return'<span class="badge bb">OK</span>';const d=Math.ceil((new Date(v)-new Date())/86400000);return d<0?'<span class="badge br">Vencido</span>':d<=30?'<span class="badge br">Por vencer</span>':'<span class="badge bg">Vigente</span>';};
 
 async function loadAll(){
-  const[a,s,p,c,par,srv]=await Promise.all([
-    sb.from('animales').select('*,cuadros(nombre)').eq('estado','activo').order('caravana_senasa'),
-    sb.from('sanidad').select('*,animales(caravana_senasa)').order('fecha',{ascending:false}).limit(200),
-    sb.from('pesajes').select('*,animales(caravana_senasa)').order('fecha',{ascending:false}).limit(200),
-    sb.from('cuadros').select('*').order('nombre'),
-    sb.from('pariciones').select('*,madre:animales!pariciones_madre_id_fkey(caravana_senasa),cria:animales!pariciones_cria_id_fkey(caravana_senasa)').order('fecha_parto',{ascending:false}),
-    sb.from('servicios').select('*,toro:animales(caravana_senasa),cuadros(nombre)').order('fecha_entrada',{ascending:false})
-  ]);
-  allAnimales=a.data||[];allSanidad=s.data||[];allPesajes=p.data||[];allCuadros=c.data||[];allPariciones=par.data||[];allServicios=srv.data||[];
+  if (isOnline) await fullSync();
   
-  const avgPeso=allPesajes.length?Math.round(allPesajes.slice(0,30).reduce((s,x)=>s+x.peso_kg,0)/Math.min(allPesajes.length,30)):'—';
+  const [animales, cuadros, pesajes, sanidad, pariciones, servicios] = await Promise.all([
+    db.animales.toArray(),
+    db.cuadros.toArray(),
+    db.pesajes.orderBy('fecha').reverse().toArray(),
+    db.sanidad.orderBy('fecha').reverse().toArray(),
+    db.pariciones.orderBy('fecha_parto').reverse().toArray(),
+    db.servicios.toArray()
+  ]);
+  
+  const cuadrosMap = {};
+  cuadros.forEach(c => cuadrosMap[c.id] = c);
+  
+  const animalesMap = {};
+  animales.forEach(a => {
+    animalesMap[a.id] = a;
+    a.cuadros = a.cuadro_id ? cuadrosMap[a.cuadro_id] : null;
+  });
+  
+  pesajes.forEach(p => { p.animales = animalesMap[p.animal_id] || null; });
+  sanidad.forEach(s => { s.animales = animalesMap[s.animal_id] || null; });
+  pariciones.forEach(p => {
+    p.madre = animalesMap[p.madre_id] || null;
+    p.cria = animalesMap[p.cria_id] || null;
+  });
+  servicios.forEach(s => {
+    s.toro = animalesMap[s.toro_id] || null;
+    s.cuadros = cuadrosMap[s.cuadro_id] || null;
+  });
+  
+  allAnimales = animales.filter(a => a.estado === 'activo').sort((a,b) => (a.caravana_senasa||'').localeCompare(b.caravana_senasa||''));
+  allSanidad = sanidad;
+  allPesajes = pesajes;
+  allCuadros = cuadros.sort((a,b) => (a.nombre||'').localeCompare(b.nombre||''));
+  allPariciones = pariciones;
+  allServicios = servicios.sort((a,b) => (b.fecha_entrada||'').localeCompare(a.fecha_entrada||''));
+  
+  const avgPeso=allPesajes.length?Math.round(allPesajes.slice(0,30).reduce((s,x)=>s+(x.peso_kg||0),0)/Math.min(allPesajes.length,30)):'—';
   const activosSrv=allServicios.filter(s=>!s.fecha_salida);
   const ctoro=activosSrv.map(s=>s.cuadro_id);
   const enSrv=allAnimales.filter(a=>a.sexo==='hembra'&&ctoro.includes(a.cuadro_id)).length;
@@ -459,7 +680,6 @@ async function loadAll(){
   const catCounts={};
   cats.forEach(c=>catCounts[c]=0);
   allAnimales.forEach(a=>{const c=calcCategoria(a);if(catCounts[c]!==undefined)catCounts[c]++;});
-  const catColores={ternera:'bb',ternero:'bb',vaquillona:'ba',novillito:'ba',vaca:'bg',novillo:'bg',toro:'br'};
   let mCatH='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
   let dCatH='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:12px">';
   cats.forEach(c=>{
@@ -472,6 +692,7 @@ async function loadAll(){
   
   mRenderAnimales();dRenderAnimales();mRenderSanidad();dRenderSanidad();dRenderPariciones();dRenderCuadros();dRenderPesajes();dRenderServicios();
   llenarSelects();
+  await updatePendingCount();
 }
 
 function llenarSelects(){
@@ -552,12 +773,15 @@ function dRenderServicios(){
 async function verAnimal(id,ctx){
   if(ctx==='m'){mPrevScreen='animales';mShowScreen('detalle');document.getElementById('m-detalle-content').innerHTML='<div class="loading">Cargando...</div>';}
   else{dShowScreen('detalle');document.getElementById('d-detalle-content').innerHTML='<div class="loading">Cargando...</div>';}
-  const[{data:a},{data:ps},{data:san},{data:par}]=await Promise.all([
-    sb.from('animales').select('*,cuadros(nombre)').eq('id',id).single(),
-    sb.from('pesajes').select('*').eq('animal_id',id).order('fecha',{ascending:false}).limit(5),
-    sb.from('sanidad').select('*').eq('animal_id',id).order('fecha',{ascending:false}),
-    sb.from('pariciones').select('*,cria:animales!pariciones_cria_id_fkey(caravana_senasa)').eq('madre_id',id).order('fecha_parto',{ascending:false})
-  ]);
+  
+  const a = await db.animales.get(id);
+  if (!a) { document.getElementById(ctx==='m'?'m-detalle-content':'d-detalle-content').innerHTML='<div class="empty">Animal no encontrado</div>'; return; }
+  a.cuadros = a.cuadro_id ? await db.cuadros.get(a.cuadro_id) : null;
+  const ps = (await db.pesajes.where('animal_id').equals(id).toArray()).sort((x,y)=>(y.fecha||'').localeCompare(x.fecha||'')).slice(0,5);
+  const san = (await db.sanidad.where('animal_id').equals(id).toArray()).sort((x,y)=>(y.fecha||'').localeCompare(x.fecha||''));
+  const par = (await db.pariciones.where('madre_id').equals(id).toArray()).sort((x,y)=>(y.fecha_parto||'').localeCompare(x.fecha_parto||''));
+  for (const p of par) p.cria = p.cria_id ? await db.animales.get(p.cria_id) : null;
+  
   const bruc=san?.find(s=>s.tipo==='brucelosis');
   const phm=ps?.length?ps.map(p=>`<div class="detail-row"><span class="detail-key">${p.fecha}</span><span class="detail-val">${p.peso_kg} kg</span></div>`).join(''):'<div class="empty" style="padding:10px 0">Sin pesajes</div>';
   const parh=par?.length?`<div class="timeline"><div class="tl-line"></div>${par.map(p=>`<div class="tl-item" onclick="abrirModalEditarParicion('${p.id}')" style="cursor:pointer"><div class="tl-dot ok"></div><div class="tl-date">${p.fecha_parto}</div><div class="tl-desc">${p.resultado||'Parto'}</div><div class="tl-sub">Cría: ${p.cria?.caravana_senasa||'—'}</div></div>`).join('')}</div>`:'<div class="empty" style="padding:10px 0">Sin pariciones</div>';
@@ -585,7 +809,9 @@ async function verAnimal(id,ctx){
 async function buscarCaravana(ctx){
   const v=document.getElementById(ctx+'-caravana-input').value.trim();
   if(!v)return;
-  const{data}=await sb.from('animales').select('*').ilike('caravana_senasa',v).maybeSingle();
+  const vl = v.toLowerCase();
+  const all = await db.animales.toArray();
+  const data = all.find(a => (a.caravana_senasa||'').toLowerCase() === vl);
   const el=document.getElementById(ctx+'-lector-resultado');
   if(data)el.innerHTML=`<div class="alert alert-b"><div class="alert-title">${data.caravana_senasa}</div><div class="alert-sub">${data.sexo} · ${data.raza||'—'} · ${data.estado}</div></div><button class="btn btn-primary" onclick="verAnimal('${data.id}','${ctx}')">Ver ficha</button>`;
   else el.innerHTML=`<div class="alert alert-a"><div class="alert-title">No encontrado</div><div class="alert-sub">${v} no está en el sistema</div></div><button class="btn btn-secondary" onclick="document.getElementById('${ctx}-new-caravana').value='${v}';${ctx==='m'?`mShowScreen('nuevo-animal')`:`dShowScreen('nuevo-animal')`}">Registrar animal</button>`;
@@ -596,11 +822,12 @@ async function guardarAnimal(ctx){
   const caravana=g('caravana')?.trim(),sexo=g('sexo');
   const msg=document.getElementById(ctx+'-nuevo-msg');
   if(!caravana||!sexo){msg.textContent='Caravana y sexo son obligatorios';msg.className='msg-err';return;}
-  const{error}=await sb.from('animales').insert({caravana_senasa:caravana,sexo,raza:g('raza')||null,fecha_nacimiento:g('fecha')||null,peso_nacimiento:g('peso')?parseFloat(g('peso')):null,cuadro_id:g('cuadro')||null,estado:'activo'});
-  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent='Animal guardado';msg.className='msg-ok';
-  await loadAll();
-  setTimeout(()=>ctx==='m'?mShowScreen('animales'):dShowScreen('animales'),1000);
+  try {
+    await dbInsert('animales', {caravana_senasa:caravana,sexo,raza:g('raza')||null,fecha_nacimiento:g('fecha')||null,peso_nacimiento:g('peso')?parseFloat(g('peso')):null,cuadro_id:g('cuadro')||null,estado:'activo'});
+    msg.textContent=isOnline?'Animal guardado':'Animal guardado (offline — se sincroniza al reconectar)';msg.className='msg-ok';
+    await loadAll();
+    setTimeout(()=>ctx==='m'?mShowScreen('animales'):dShowScreen('animales'),1000);
+  } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
 // ============ MODALES ============
@@ -623,11 +850,12 @@ async function guardarCuadro(){
   const msg=document.getElementById('mod-msg');
   const nombre=document.getElementById('mod-nombre').value.trim();
   if(!nombre){msg.textContent='Nombre obligatorio';msg.className='msg-err';return;}
-  const{error}=await sb.from('cuadros').insert({nombre,hectareas:parseFloat(document.getElementById('mod-hectareas').value)||null,descripcion:document.getElementById('mod-descripcion').value||null});
-  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent='Cuadro guardado';msg.className='msg-ok';
-  await loadAll();
-  setTimeout(closeModal,800);
+  try {
+    await dbInsert('cuadros', {nombre,hectareas:parseFloat(document.getElementById('mod-hectareas').value)||null,descripcion:document.getElementById('mod-descripcion').value||null});
+    msg.textContent=isOnline?'Cuadro guardado':'Cuadro guardado (offline)';msg.className='msg-ok';
+    await loadAll();
+    setTimeout(closeModal,800);
+  } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
 function opcionesAnimales(selectedId){
@@ -656,13 +884,14 @@ async function guardarPesaje(){
   const peso=parseFloat(document.getElementById('mod-peso').value);
   const fecha=document.getElementById('mod-fecha').value;
   if(!animal_id||!peso||!fecha){msg.textContent='Animal, peso y fecha son obligatorios';msg.className='msg-err';return;}
-  const{error}=await sb.from('pesajes').insert({animal_id,peso_kg:peso,fecha,observaciones:document.getElementById('mod-obs').value||null});
-  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent='Pesaje guardado';msg.className='msg-ok';
-  await loadAll();
-  const screen=document.querySelector('.d-screen.active')?.id||document.querySelector('.screen.active')?.id;
-  if(screen&&screen.includes('detalle')){const id=allAnimales.find(a=>a.id===animal_id);if(id)verAnimal(animal_id,screen.startsWith('m-')?'m':'d');}
-  setTimeout(closeModal,800);
+  try {
+    await dbInsert('pesajes', {animal_id,peso_kg:peso,fecha,observaciones:document.getElementById('mod-obs').value||null});
+    msg.textContent=isOnline?'Pesaje guardado':'Pesaje guardado (offline)';msg.className='msg-ok';
+    await loadAll();
+    const screen=document.querySelector('.d-screen.active')?.id||document.querySelector('.screen.active')?.id;
+    if(screen&&screen.includes('detalle'))verAnimal(animal_id,screen.startsWith('m-')?'m':'d');
+    setTimeout(closeModal,800);
+  } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
 function abrirModalSanidad(animalId){
@@ -693,18 +922,19 @@ async function guardarSanidad(){
   const tipo=document.getElementById('mod-tipo').value;
   const fecha=document.getElementById('mod-fecha').value;
   if(!animal_id||!tipo||!fecha){msg.textContent='Animal, tipo y fecha son obligatorios';msg.className='msg-err';return;}
-  const{error}=await sb.from('sanidad').insert({
-    animal_id,tipo,fecha,
-    producto:document.getElementById('mod-producto').value||null,
-    fecha_vencimiento:document.getElementById('mod-venc').value||null,
-    lote:document.getElementById('mod-lote').value||null,
-    resultado:document.getElementById('mod-resultado').value||null,
-    observaciones:document.getElementById('mod-obs').value||null
-  });
-  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent='Sanidad guardada';msg.className='msg-ok';
-  await loadAll();
-  setTimeout(closeModal,800);
+  try {
+    await dbInsert('sanidad', {
+      animal_id,tipo,fecha,
+      producto:document.getElementById('mod-producto').value||null,
+      fecha_vencimiento:document.getElementById('mod-venc').value||null,
+      lote:document.getElementById('mod-lote').value||null,
+      resultado:document.getElementById('mod-resultado').value||null,
+      observaciones:document.getElementById('mod-obs').value||null
+    });
+    msg.textContent=isOnline?'Sanidad guardada':'Sanidad guardada (offline)';msg.className='msg-ok';
+    await loadAll();
+    setTimeout(closeModal,800);
+  } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
 function abrirModalParicion(madreId){
@@ -766,34 +996,34 @@ async function guardarParicion(){
   
   let cria_id=null;
   
-  if(criaMode==='nueva'&&resultado!=='muerto'){
-    const caravana=document.getElementById('mod-cria-caravana').value.trim();
-    if(!caravana){msg.textContent='Cargá la caravana de la cría (o cambiá a "Sin cría")';msg.className='msg-err';return;}
-    const madre=allAnimales.find(a=>a.id===madre_id);
-    const{data:nuevaCria,error:errCria}=await sb.from('animales').insert({
-      caravana_senasa:caravana,
-      sexo:document.getElementById('mod-cria-sexo').value,
-      raza:document.getElementById('mod-cria-raza').value||madre?.raza||null,
-      fecha_nacimiento:fecha_parto,
-      peso_nacimiento:parseFloat(document.getElementById('mod-cria-peso').value)||null,
-      madre_id:madre_id,
-      cuadro_id:madre?.cuadro_id||null,
-      estado:'activo'
-    }).select().single();
-    if(errCria){msg.textContent='Error al crear cría: '+errCria.message;msg.className='msg-err';return;}
-    cria_id=nuevaCria.id;
-  } else if(criaMode==='existente'){
-    cria_id=document.getElementById('mod-cria-existente').value||null;
-  }
-  
-  const{error}=await sb.from('pariciones').insert({
-    madre_id,fecha_parto,cria_id,resultado,
-    observaciones:document.getElementById('mod-obs').value||null
-  });
-  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent=cria_id?'Parición y cría guardadas':'Parición guardada';msg.className='msg-ok';
-  await loadAll();
-  setTimeout(closeModal,1000);
+  try {
+    if(criaMode==='nueva'&&resultado!=='muerto'){
+      const caravana=document.getElementById('mod-cria-caravana').value.trim();
+      if(!caravana){msg.textContent='Cargá la caravana de la cría (o cambiá a "Sin cría")';msg.className='msg-err';return;}
+      const madre=allAnimales.find(a=>a.id===madre_id);
+      const nuevaCria = await dbInsert('animales', {
+        caravana_senasa:caravana,
+        sexo:document.getElementById('mod-cria-sexo').value,
+        raza:document.getElementById('mod-cria-raza').value||madre?.raza||null,
+        fecha_nacimiento:fecha_parto,
+        peso_nacimiento:parseFloat(document.getElementById('mod-cria-peso').value)||null,
+        madre_id:madre_id,
+        cuadro_id:madre?.cuadro_id||null,
+        estado:'activo'
+      });
+      cria_id=nuevaCria.id;
+    } else if(criaMode==='existente'){
+      cria_id=document.getElementById('mod-cria-existente').value||null;
+    }
+    
+    await dbInsert('pariciones', {
+      madre_id,fecha_parto,cria_id,resultado,
+      observaciones:document.getElementById('mod-obs').value||null
+    });
+    msg.textContent=isOnline?(cria_id?'Parición y cría guardadas':'Parición guardada'):'Guardado offline';msg.className='msg-ok';
+    await loadAll();
+    setTimeout(closeModal,1000);
+  } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
 function abrirModalEditarParicion(id){
@@ -821,26 +1051,28 @@ async function actualizarParicion(id){
   const madre_id=document.getElementById('mod-madre').value;
   const fecha_parto=document.getElementById('mod-fecha').value;
   if(!madre_id||!fecha_parto){msg.textContent='Madre y fecha son obligatorios';msg.className='msg-err';return;}
-  const{error}=await sb.from('pariciones').update({
-    madre_id,fecha_parto,
-    cria_id:document.getElementById('mod-cria').value||null,
-    resultado:document.getElementById('mod-resultado').value,
-    observaciones:document.getElementById('mod-obs').value||null
-  }).eq('id',id);
-  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent='Parición actualizada';msg.className='msg-ok';
-  await loadAll();
-  setTimeout(closeModal,800);
+  try {
+    await dbUpdate('pariciones', id, {
+      madre_id,fecha_parto,
+      cria_id:document.getElementById('mod-cria').value||null,
+      resultado:document.getElementById('mod-resultado').value,
+      observaciones:document.getElementById('mod-obs').value||null
+    });
+    msg.textContent=isOnline?'Parición actualizada':'Actualizada (offline)';msg.className='msg-ok';
+    await loadAll();
+    setTimeout(closeModal,800);
+  } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
 async function eliminarParicion(id){
   if(!confirm('¿Eliminar esta parición? No se puede deshacer.'))return;
   const msg=document.getElementById('mod-msg');
-  const{error}=await sb.from('pariciones').delete().eq('id',id);
-  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent='Parición eliminada';msg.className='msg-ok';
-  await loadAll();
-  setTimeout(closeModal,800);
+  try {
+    await dbDelete('pariciones', id);
+    msg.textContent='Parición eliminada';msg.className='msg-ok';
+    await loadAll();
+    setTimeout(closeModal,800);
+  } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
 function abrirModalServicio(){
@@ -867,15 +1099,16 @@ async function guardarServicio(){
   const cuadro_id=document.getElementById('mod-cuadro').value;
   const fecha_entrada=document.getElementById('mod-entrada').value;
   if(!toro_id||!cuadro_id||!fecha_entrada){msg.textContent='Toro, cuadro y fecha entrada son obligatorios';msg.className='msg-err';return;}
-  const{error}=await sb.from('servicios').insert({
-    toro_id,cuadro_id,fecha_entrada,
-    fecha_salida:document.getElementById('mod-salida').value||null,
-    temporada:document.getElementById('mod-temporada').value||null
-  });
-  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent='Servicio guardado';msg.className='msg-ok';
-  await loadAll();
-  setTimeout(closeModal,800);
+  try {
+    await dbInsert('servicios', {
+      toro_id,cuadro_id,fecha_entrada,
+      fecha_salida:document.getElementById('mod-salida').value||null,
+      temporada:document.getElementById('mod-temporada').value||null
+    });
+    msg.textContent=isOnline?'Servicio guardado':'Servicio guardado (offline)';msg.className='msg-ok';
+    await loadAll();
+    setTimeout(closeModal,800);
+  } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
 function abrirModalEditarAnimal(id){
@@ -902,21 +1135,22 @@ async function guardarEdicionAnimal(id){
   const msg=document.getElementById('mod-msg');
   const caravana=document.getElementById('mod-caravana').value.trim();
   if(!caravana){msg.textContent='Caravana es obligatoria';msg.className='msg-err';return;}
-  const{error}=await sb.from('animales').update({
-    caravana_senasa:caravana,
-    sexo:document.getElementById('mod-sexo').value,
-    raza:document.getElementById('mod-raza').value||null,
-    fecha_nacimiento:document.getElementById('mod-fecha').value||null,
-    cuadro_id:document.getElementById('mod-cuadro').value||null,
-    categoria_manual:document.getElementById('mod-cat').value||null,
-    estado:document.getElementById('mod-estado').value
-  }).eq('id',id);
-  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent='Cambios guardados';msg.className='msg-ok';
-  await loadAll();
-  const screen=document.querySelector('.d-screen.active')?.id||document.querySelector('.screen.active')?.id;
-  if(screen&&screen.includes('detalle'))verAnimal(id,screen.startsWith('m-')?'m':'d');
-  setTimeout(closeModal,800);
+  try {
+    await dbUpdate('animales', id, {
+      caravana_senasa:caravana,
+      sexo:document.getElementById('mod-sexo').value,
+      raza:document.getElementById('mod-raza').value||null,
+      fecha_nacimiento:document.getElementById('mod-fecha').value||null,
+      cuadro_id:document.getElementById('mod-cuadro').value||null,
+      categoria_manual:document.getElementById('mod-cat').value||null,
+      estado:document.getElementById('mod-estado').value
+    });
+    msg.textContent=isOnline?'Cambios guardados':'Guardado (offline)';msg.className='msg-ok';
+    await loadAll();
+    const screen=document.querySelector('.d-screen.active')?.id||document.querySelector('.screen.active')?.id;
+    if(screen&&screen.includes('detalle'))verAnimal(id,screen.startsWith('m-')?'m':'d');
+    setTimeout(closeModal,800);
+  } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
 function abrirModalAsignarCuadro(){
@@ -972,11 +1206,12 @@ async function guardarAsignacion(){
   if(!cuadroId){msg.textContent='Seleccioná un cuadro';msg.className='msg-err';return;}
   const ids=Array.from(document.querySelectorAll('.asign-check:checked')).map(c=>c.value);
   if(!ids.length){msg.textContent='Seleccioná al menos un animal';msg.className='msg-err';return;}
-  const{error}=await sb.from('animales').update({cuadro_id:cuadroId}).in('id',ids);
-  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent=`${ids.length} animal${ids.length>1?'es':''} asignado${ids.length>1?'s':''}`;msg.className='msg-ok';
-  await loadAll();
-  setTimeout(closeModal,1000);
+  try {
+    for (const id of ids) await dbUpdate('animales', id, {cuadro_id: cuadroId});
+    msg.textContent=`${ids.length} animal${ids.length>1?'es':''} asignado${ids.length>1?'s':''}${isOnline?'':' (offline)'}`;msg.className='msg-ok';
+    await loadAll();
+    setTimeout(closeModal,1000);
+  } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
 function mShowScreen(id){
