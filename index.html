@@ -249,8 +249,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
       <button class="nav-item active" id="d-nav-dashboard" onclick="dShowScreen('dashboard')"><span class="nav-icon">⌂</span>Dashboard</button>
       <button class="nav-item" id="d-nav-animales" onclick="dShowScreen('animales')"><span class="nav-icon">♦</span>Animales</button>
       <button class="nav-item" id="d-nav-cuadros" onclick="dShowScreen('cuadros')"><span class="nav-icon">▦</span>Cuadros</button>
-      <button class="nav-item" id="d-nav-lector" onclick="dShowScreen('lector')"><span class="nav-icon">◉</span>Lector BLE</button>
-      <div class="nav-group">Gestión</div>
+      <button class="nav-item" id="d-nav-lector" onclick="dShowScreen('lector')"><span class="nav-icon">◉</span>Lector BLE</button>      <div class="nav-group">Gestión</div>
       <button class="nav-item" id="d-nav-sanidad" onclick="dShowScreen('sanidad')"><span class="nav-icon">✚</span>Sanidad</button>
       <button class="nav-item" id="d-nav-pesajes" onclick="dShowScreen('pesajes')"><span class="nav-icon">⚖</span>Pesajes</button>
       <button class="nav-item" id="d-nav-pariciones" onclick="dShowScreen('pariciones')"><span class="nav-icon">◈</span>Pariciones</button>
@@ -285,11 +284,13 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
           <input class="form-input" type="search" placeholder="Buscar caravana..." id="d-search" oninput="dRenderAnimales()" style="max-width:260px">
           <select class="form-input" id="d-filtro-sexo" onchange="dRenderAnimales()" style="max-width:140px"><option value="todos">Todos</option><option value="hembra">Hembras</option><option value="macho">Machos</option></select>
           <select class="form-input" id="d-filtro-cuadro" onchange="dRenderAnimales()" style="max-width:180px"><option value="todos">Todos los cuadros</option></select>
+          <select class="form-input" id="d-filtro-categoria" onchange="dRenderAnimales()" style="max-width:160px"><option value="todos">Todas categorías</option><option value="ternera">Ternera</option><option value="ternero">Ternero</option><option value="vaquillona">Vaquillona</option><option value="vaca">Vaca</option><option value="novillito">Novillito</option><option value="novillo">Novillo</option><option value="toro">Toro</option></select>
           <button class="btn btn-primary btn-sm" onclick="dShowScreen('nuevo-animal')">+ Nuevo animal</button>
+          <button class="btn btn-secondary btn-sm" onclick="abrirModalAsignarCuadro()">Asignar a cuadro</button>
         </div>
         <div class="d-card" style="padding:0;overflow:hidden">
-          <table class="d-table"><thead><tr><th>Caravana</th><th>Sexo</th><th>Raza</th><th>Edad</th><th>Cuadro</th><th>Último peso</th><th>Estado</th></tr></thead>
-          <tbody id="d-animales-tbody"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody></table>
+          <table class="d-table"><thead><tr><th>Caravana</th><th>Sexo</th><th>Categoría</th><th>Raza</th><th>Edad</th><th>Cuadro</th><th>Último peso</th><th>Estado</th></tr></thead>
+          <tbody id="d-animales-tbody"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
 
@@ -390,7 +391,24 @@ const sb = supabase.createClient(
 let allAnimales=[],allSanidad=[],allPariciones=[],allCuadros=[],allPesajes=[],allServicios=[];
 let mFiltroAnimal='todos',mFiltroSanidad='todos',mPrevScreen='dashboard';
 
-const calcEdad=f=>{const d=new Date(f),h=new Date(),m=(h.getFullYear()-d.getFullYear())*12+h.getMonth()-d.getMonth();return m<12?m+' m':Math.floor(m/12)+' años';};
+const calcEdadMeses=f=>{if(!f)return null;const d=new Date(f),h=new Date();return (h.getFullYear()-d.getFullYear())*12+h.getMonth()-d.getMonth();};
+const calcEdad=f=>{const m=calcEdadMeses(f);if(m===null)return '—';return m<12?m+' m':Math.floor(m/12)+' años';};
+const calcCategoria=(animal)=>{
+  const m=calcEdadMeses(animal.fecha_nacimiento);
+  if(m===null)return '—';
+  if(m<8)return animal.sexo==='hembra'?'ternera':'ternero';
+  if(animal.sexo==='hembra'){
+    if(m<24)return 'vaquillona';
+    return 'vaca';
+  }
+  if(m<18)return 'novillito';
+  return animal.categoria_manual==='toro'?'toro':'novillo';
+};
+const categoriaBadge=(animal)=>{
+  const c=calcCategoria(animal);
+  const colores={ternera:'bb',ternero:'bb',vaquillona:'ba',novillito:'ba',vaca:'bg',novillo:'bg',toro:'br'};
+  return `<span class="badge ${colores[c]||'bb'}">${c}</span>`;
+};
 const badgeSan=v=>{if(!v)return'<span class="badge bb">OK</span>';const d=Math.ceil((new Date(v)-new Date())/86400000);return d<0?'<span class="badge br">Vencido</span>':d<=30?'<span class="badge br">Por vencer</span>':'<span class="badge bg">Vigente</span>';};
 
 async function loadAll(){
@@ -458,7 +476,7 @@ function mRenderAnimales(){
   if(mFiltroAnimal!=='todos')l=l.filter(a=>a.sexo===mFiltroAnimal);
   const q=document.getElementById('m-search')?.value?.toLowerCase();
   if(q)l=l.filter(a=>a.caravana_senasa.toLowerCase().includes(q));
-  document.getElementById('m-animales-list').innerHTML=l.length?l.map(a=>`<div class="list-item" onclick="verAnimal('${a.id}','m')"><div class="avatar ${a.sexo==='hembra'?'av-h':'av-m'}">${a.sexo==='hembra'?'H':'M'}</div><div><div class="item-name">${a.caravana_senasa}</div><div class="item-sub">${a.sexo} · ${a.raza||'—'} · ${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</div></div><div class="item-right"><div class="item-meta">${a.cuadros?.nombre||'Sin cuadro'}</div></div></div>`).join(''):'<div class="empty">Sin resultados</div>';
+  document.getElementById('m-animales-list').innerHTML=l.length?l.map(a=>`<div class="list-item" onclick="verAnimal('${a.id}','m')"><div class="avatar ${a.sexo==='hembra'?'av-h':'av-m'}">${a.sexo==='hembra'?'H':'M'}</div><div><div class="item-name">${a.caravana_senasa}</div><div class="item-sub">${calcCategoria(a)} · ${a.raza||'—'} · ${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</div></div><div class="item-right"><div class="item-meta">${a.cuadros?.nombre||'Sin cuadro'}</div></div></div>`).join(''):'<div class="empty">Sin resultados</div>';
 }
 
 function dRenderAnimales(){
@@ -466,10 +484,12 @@ function dRenderAnimales(){
   const q=document.getElementById('d-search')?.value?.toLowerCase();
   const f=document.getElementById('d-filtro-sexo')?.value;
   const fc=document.getElementById('d-filtro-cuadro')?.value;
+  const fcat=document.getElementById('d-filtro-categoria')?.value;
   if(f&&f!=='todos')l=l.filter(a=>a.sexo===f);
   if(fc&&fc!=='todos')l=l.filter(a=>a.cuadro_id===fc);
+  if(fcat&&fcat!=='todos')l=l.filter(a=>calcCategoria(a)===fcat);
   if(q)l=l.filter(a=>a.caravana_senasa.toLowerCase().includes(q));
-  document.getElementById('d-animales-tbody').innerHTML=l.length?l.map(a=>`<tr onclick="verAnimal('${a.id}','d')"><td class="mono">${a.caravana_senasa}</td><td>${a.sexo}</td><td>${a.raza||'—'}</td><td>${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</td><td>${a.cuadros?.nombre||'Sin cuadro'}</td><td class="mono">${ultimoPeso(a.id)}</td><td><span class="badge bg">${a.estado}</span></td></tr>`).join(''):'<tr><td colspan="7" class="empty">Sin resultados</td></tr>';
+  document.getElementById('d-animales-tbody').innerHTML=l.length?l.map(a=>`<tr onclick="verAnimal('${a.id}','d')"><td class="mono">${a.caravana_senasa}</td><td>${a.sexo}</td><td>${categoriaBadge(a)}</td><td>${a.raza||'—'}</td><td>${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</td><td>${a.cuadros?.nombre||'Sin cuadro'}</td><td class="mono">${ultimoPeso(a.id)}</td><td><span class="badge bg">${a.estado}</span></td></tr>`).join(''):'<tr><td colspan="8" class="empty">Sin resultados</td></tr>';
 }
 
 function mFiltrar(f,btn){mFiltroAnimal=f;document.querySelectorAll('#m-screen-animales .tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mRenderAnimales();}
@@ -524,11 +544,14 @@ async function verAnimal(id,ctx){
   const bruc=san?.find(s=>s.tipo==='brucelosis');
   const phm=ps?.length?ps.map(p=>`<div class="detail-row"><span class="detail-key">${p.fecha}</span><span class="detail-val">${p.peso_kg} kg</span></div>`).join(''):'<div class="empty" style="padding:10px 0">Sin pesajes</div>';
   const parh=par?.length?`<div class="timeline"><div class="tl-line"></div>${par.map(p=>`<div class="tl-item"><div class="tl-dot ok"></div><div class="tl-date">${p.fecha_parto}</div><div class="tl-desc">${p.resultado||'Parto'}</div><div class="tl-sub">Cría: ${p.cria?.caravana_senasa||'—'}</div></div>`).join('')}</div>`:'<div class="empty" style="padding:10px 0">Sin pariciones</div>';
-  const html=`<div style="text-align:center;padding:8px 0 20px"><div class="avatar ${a.sexo==='hembra'?'av-h':'av-m'}" style="width:52px;height:52px;font-size:18px;margin:0 auto 10px">${a.sexo==='hembra'?'H':'M'}</div><div style="font-size:18px;font-weight:500;font-family:var(--font-mono)">${a.caravana_senasa}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${a.sexo} · ${a.raza||'—'} · ${a.cuadros?.nombre||'Sin cuadro'}</div></div>
-  <div class="card"><div class="card-title">Datos generales</div>
+  const html=`<div style="text-align:center;padding:8px 0 20px"><div class="avatar ${a.sexo==='hembra'?'av-h':'av-m'}" style="width:52px;height:52px;font-size:18px;margin:0 auto 10px">${a.sexo==='hembra'?'H':'M'}</div><div style="font-size:18px;font-weight:500;font-family:var(--font-mono)">${a.caravana_senasa}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${categoriaBadge(a)} · ${a.raza||'—'} · ${a.cuadros?.nombre||'Sin cuadro'}</div></div>
+  <div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Datos generales <button class="btn-add" onclick="abrirModalEditarAnimal('${a.id}')">Editar</button></div>
+    <div class="detail-row"><span class="detail-key">Categoría</span><span>${categoriaBadge(a)}</span></div>
     <div class="detail-row"><span class="detail-key">Nacimiento</span><span class="detail-val">${a.fecha_nacimiento||'—'}</span></div>
     <div class="detail-row"><span class="detail-key">Edad</span><span class="detail-val">${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Cuadro</span><span class="detail-val">${a.cuadros?.nombre||'Sin asignar'}</span></div>
     <div class="detail-row"><span class="detail-key">Último peso</span><span class="detail-val">${ps?.[0]?.peso_kg||'—'} kg</span></div>
+    <div class="detail-row"><span class="detail-key">Estado</span><span class="detail-val">${a.estado}</span></div>
   </div>
   <div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Pesajes <button class="btn-add" onclick="abrirModalPesaje('${a.id}')">+ Nuevo</button></div>${phm}</div>
   <div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Sanidad <button class="btn-add" onclick="abrirModalSanidad('${a.id}')">+ Nuevo</button></div>
@@ -735,6 +758,107 @@ async function guardarServicio(){
   msg.textContent='Servicio guardado';msg.className='msg-ok';
   await loadAll();
   setTimeout(closeModal,800);
+}
+
+function abrirModalEditarAnimal(id){
+  const a=allAnimales.find(x=>x.id===id);
+  if(!a)return;
+  openModal(`
+    <div class="modal-title">Editar animal · ${a.caravana_senasa}</div>
+    <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="mod-caravana" value="${a.caravana_senasa}" style="font-family:var(--font-mono)"></div>
+    <div class="row2">
+      <div class="form-group"><label class="form-label">Sexo</label><select class="form-input" id="mod-sexo"><option value="hembra" ${a.sexo==='hembra'?'selected':''}>Hembra</option><option value="macho" ${a.sexo==='macho'?'selected':''}>Macho</option></select></div>
+      <div class="form-group"><label class="form-label">Raza</label><input class="form-input" type="text" id="mod-raza" value="${a.raza||''}"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Fecha nacimiento</label><input class="form-input" type="date" id="mod-fecha" value="${a.fecha_nacimiento||''}"></div>
+    <div class="form-group"><label class="form-label">Cuadro</label><select class="form-input" id="mod-cuadro"><option value="">Sin asignar</option>${allCuadros.map(c=>`<option value="${c.id}" ${a.cuadro_id===c.id?'selected':''}>${c.nombre}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Categoría especial (machos)</label><select class="form-input" id="mod-cat"><option value="">Automática por edad</option><option value="toro" ${a.categoria_manual==='toro'?'selected':''}>Toro (reproductor)</option></select><div style="font-size:11px;color:var(--text3);margin-top:4px">Por defecto, los machos > 18 meses se consideran novillos. Marcá "Toro" si es reproductor.</div></div>
+    <div class="form-group"><label class="form-label">Estado</label><select class="form-input" id="mod-estado"><option value="activo" ${a.estado==='activo'?'selected':''}>Activo</option><option value="vendido" ${a.estado==='vendido'?'selected':''}>Vendido</option><option value="muerto" ${a.estado==='muerto'?'selected':''}>Muerto</option></select></div>
+    <button class="btn btn-primary" onclick="guardarEdicionAnimal('${id}')">Guardar cambios</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <div id="mod-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
+  `);
+}
+
+async function guardarEdicionAnimal(id){
+  const msg=document.getElementById('mod-msg');
+  const caravana=document.getElementById('mod-caravana').value.trim();
+  if(!caravana){msg.textContent='Caravana es obligatoria';msg.className='msg-err';return;}
+  const{error}=await sb.from('animales').update({
+    caravana_senasa:caravana,
+    sexo:document.getElementById('mod-sexo').value,
+    raza:document.getElementById('mod-raza').value||null,
+    fecha_nacimiento:document.getElementById('mod-fecha').value||null,
+    cuadro_id:document.getElementById('mod-cuadro').value||null,
+    categoria_manual:document.getElementById('mod-cat').value||null,
+    estado:document.getElementById('mod-estado').value
+  }).eq('id',id);
+  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
+  msg.textContent='Cambios guardados';msg.className='msg-ok';
+  await loadAll();
+  const screen=document.querySelector('.d-screen.active')?.id||document.querySelector('.screen.active')?.id;
+  if(screen&&screen.includes('detalle'))verAnimal(id,screen.startsWith('m-')?'m':'d');
+  setTimeout(closeModal,800);
+}
+
+function abrirModalAsignarCuadro(){
+  openModal(`
+    <div class="modal-title">Asignar animales a cuadro</div>
+    <div class="form-group"><label class="form-label">Cuadro destino</label><select class="form-input" id="mod-cuadro"><option value="">Seleccionar...</option>${allCuadros.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Filtrar animales</label>
+      <select class="form-input" id="mod-filtro" onchange="filtrarAsignacion()">
+        <option value="todos">Todos sin cuadro</option>
+        <option value="hembras">Hembras sin cuadro</option>
+        <option value="machos">Machos sin cuadro</option>
+        <option value="vaquillonas">Vaquillonas</option>
+        <option value="vacas">Vacas</option>
+        <option value="novillitos">Novillitos</option>
+        <option value="novillos">Novillos</option>
+        <option value="terneros">Terneros/as</option>
+        <option value="todosanimales">Todos los animales</option>
+      </select>
+    </div>
+    <div style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:10px;margin-bottom:14px" id="mod-lista-animales"></div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px"><span id="mod-count">0</span> animales seleccionados</div>
+    <button class="btn btn-primary" onclick="guardarAsignacion()">Asignar al cuadro</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <div id="mod-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
+  `);
+  filtrarAsignacion();
+}
+
+function filtrarAsignacion(){
+  const f=document.getElementById('mod-filtro').value;
+  let l=allAnimales;
+  if(f==='todos')l=l.filter(a=>!a.cuadro_id);
+  else if(f==='hembras')l=l.filter(a=>!a.cuadro_id&&a.sexo==='hembra');
+  else if(f==='machos')l=l.filter(a=>!a.cuadro_id&&a.sexo==='macho');
+  else if(f==='vaquillonas')l=l.filter(a=>calcCategoria(a)==='vaquillona');
+  else if(f==='vacas')l=l.filter(a=>calcCategoria(a)==='vaca');
+  else if(f==='novillitos')l=l.filter(a=>calcCategoria(a)==='novillito');
+  else if(f==='novillos')l=l.filter(a=>calcCategoria(a)==='novillo');
+  else if(f==='terneros')l=l.filter(a=>['ternera','ternero'].includes(calcCategoria(a)));
+  const html=l.length?l.map(a=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;border-bottom:1px solid var(--border)"><input type="checkbox" class="asign-check" value="${a.id}" onchange="actualizarCount()"><span class="mono" style="font-size:12px">${a.caravana_senasa}</span><span style="font-size:11px;color:var(--text2);margin-left:auto">${calcCategoria(a)} · ${a.cuadros?.nombre||'sin cuadro'}</span></label>`).join(''):'<div class="empty">Sin animales en este filtro</div>';
+  document.getElementById('mod-lista-animales').innerHTML=html;
+  actualizarCount();
+}
+
+function actualizarCount(){
+  const n=document.querySelectorAll('.asign-check:checked').length;
+  document.getElementById('mod-count').textContent=n;
+}
+
+async function guardarAsignacion(){
+  const msg=document.getElementById('mod-msg');
+  const cuadroId=document.getElementById('mod-cuadro').value;
+  if(!cuadroId){msg.textContent='Seleccioná un cuadro';msg.className='msg-err';return;}
+  const ids=Array.from(document.querySelectorAll('.asign-check:checked')).map(c=>c.value);
+  if(!ids.length){msg.textContent='Seleccioná al menos un animal';msg.className='msg-err';return;}
+  const{error}=await sb.from('animales').update({cuadro_id:cuadroId}).in('id',ids);
+  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
+  msg.textContent=`${ids.length} animal${ids.length>1?'es':''} asignado${ids.length>1?'s':''}`;msg.className='msg-ok';
+  await loadAll();
+  setTimeout(closeModal,1000);
 }
 
 function mShowScreen(id){
