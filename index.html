@@ -202,8 +202,13 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
     <div id="m-screen-animales" class="screen">
       <div class="nav-tabs">
         <button class="tab-btn active" onclick="mFiltrar('todos',this)">Todos</button>
-        <button class="tab-btn" onclick="mFiltrar('hembra',this)">Hembras</button>
-        <button class="tab-btn" onclick="mFiltrar('macho',this)">Machos</button>
+        <button class="tab-btn" onclick="mFiltrar('vaca',this)">Vacas</button>
+        <button class="tab-btn" onclick="mFiltrar('vaquillona',this)">Vaquillonas</button>
+        <button class="tab-btn" onclick="mFiltrar('ternera',this)">Terneras</button>
+        <button class="tab-btn" onclick="mFiltrar('ternero',this)">Terneros</button>
+        <button class="tab-btn" onclick="mFiltrar('novillito',this)">Novillitos</button>
+        <button class="tab-btn" onclick="mFiltrar('novillo',this)">Novillos</button>
+        <button class="tab-btn" onclick="mFiltrar('toro',this)">Toros</button>
       </div>
       <div class="section">
         <div class="form-group" style="margin-bottom:8px"><input class="form-input" type="search" placeholder="Buscar caravana..." id="m-search" oninput="mRenderAnimales()"></div>
@@ -213,7 +218,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
     <div id="m-screen-lector" class="screen">
       <div class="section" style="padding-top:16px">
         <div class="ble-card"><div class="ble-icon">⬡</div><div class="ble-title">Listo para escanear</div><div class="ble-sub">El lector escribe la caravana automáticamente</div></div>
-        <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="m-caravana-input" placeholder="AR000000000" style="font-family:var(--font-mono);font-size:16px"></div>
+        <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="m-caravana-input" placeholder="AR000000000" style="font-family:var(--font-mono);font-size:16px" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarCaravana('m');}"></div>
         <button class="btn btn-primary" onclick="buscarCaravana('m')">Buscar animal</button>
         <button class="btn btn-secondary" onclick="mShowScreen('nuevo-animal')">+ Registrar nuevo animal</button>
         <div id="m-lector-resultado" style="margin-top:16px"></div>
@@ -293,9 +298,8 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
       <div id="d-screen-animales" class="d-screen">
         <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center;flex-wrap:wrap">
           <input class="form-input" type="search" placeholder="Buscar caravana..." id="d-search" oninput="dRenderAnimales()" style="max-width:260px">
-          <select class="form-input" id="d-filtro-sexo" onchange="dRenderAnimales()" style="max-width:140px"><option value="todos">Todos</option><option value="hembra">Hembras</option><option value="macho">Machos</option></select>
           <select class="form-input" id="d-filtro-cuadro" onchange="dRenderAnimales()" style="max-width:180px"><option value="todos">Todos los cuadros</option></select>
-          <select class="form-input" id="d-filtro-categoria" onchange="dRenderAnimales()" style="max-width:160px"><option value="todos">Todas categorías</option><option value="ternera">Ternera</option><option value="ternero">Ternero</option><option value="vaquillona">Vaquillona</option><option value="vaca">Vaca</option><option value="novillito">Novillito</option><option value="novillo">Novillo</option><option value="toro">Toro</option></select>
+          <select class="form-input" id="d-filtro-categoria" onchange="dRenderAnimales()" style="max-width:160px"><option value="todos">Todas categorías</option><option value="vaca">Vaca</option><option value="vaquillona">Vaquillona</option><option value="ternera">Ternera</option><option value="ternero">Ternero</option><option value="novillito">Novillito</option><option value="novillo">Novillo</option><option value="toro">Toro</option></select>
           <button class="btn btn-primary btn-sm" onclick="dShowScreen('nuevo-animal')">+ Nuevo animal</button>
           <button class="btn btn-secondary btn-sm" onclick="abrirModalAsignarCuadro()">Asignar a cuadro</button>
         </div>
@@ -318,7 +322,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
       <div id="d-screen-lector" class="d-screen">
         <div style="max-width:480px">
           <div class="ble-card"><div class="ble-icon">⬡</div><div class="ble-title">Listo para escanear</div><div class="ble-sub">El lector escribe la caravana automáticamente</div></div>
-          <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="d-caravana-input" placeholder="AR000000000" style="font-family:var(--font-mono);font-size:18px"></div>
+          <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="d-caravana-input" placeholder="AR000000000" style="font-family:var(--font-mono);font-size:18px" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarCaravana('d');}"></div>
           <button class="btn btn-primary" onclick="buscarCaravana('d')">Buscar animal</button>
           <div id="d-lector-resultado" style="margin-top:16px"></div>
         </div>
@@ -715,7 +719,7 @@ function ultimoPeso(animalId){
 
 function mRenderAnimales(){
   let l=allAnimales;
-  if(mFiltroAnimal!=='todos')l=l.filter(a=>a.sexo===mFiltroAnimal);
+  if(mFiltroAnimal!=='todos')l=l.filter(a=>calcCategoria(a)===mFiltroAnimal);
   const q=document.getElementById('m-search')?.value?.toLowerCase();
   if(q)l=l.filter(a=>a.caravana_senasa.toLowerCase().includes(q));
   document.getElementById('m-animales-list').innerHTML=l.length?l.map(a=>`<div class="list-item" onclick="verAnimal('${a.id}','m')"><div class="avatar ${a.sexo==='hembra'?'av-h':'av-m'}">${a.sexo==='hembra'?'H':'M'}</div><div><div class="item-name">${a.caravana_senasa}</div><div class="item-sub">${calcCategoria(a)} · ${a.raza||'—'} · ${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</div></div><div class="item-right"><div class="item-meta">${a.cuadros?.nombre||'Sin cuadro'}</div></div></div>`).join(''):'<div class="empty">Sin resultados</div>';
@@ -724,10 +728,8 @@ function mRenderAnimales(){
 function dRenderAnimales(){
   let l=allAnimales;
   const q=document.getElementById('d-search')?.value?.toLowerCase();
-  const f=document.getElementById('d-filtro-sexo')?.value;
   const fc=document.getElementById('d-filtro-cuadro')?.value;
   const fcat=document.getElementById('d-filtro-categoria')?.value;
-  if(f&&f!=='todos')l=l.filter(a=>a.sexo===f);
   if(fc&&fc!=='todos')l=l.filter(a=>a.cuadro_id===fc);
   if(fcat&&fcat!=='todos')l=l.filter(a=>calcCategoria(a)===fcat);
   if(q)l=l.filter(a=>a.caravana_senasa.toLowerCase().includes(q));
@@ -1227,6 +1229,7 @@ function mShowScreen(id){
   const t={dashboard:'Estancia Cancahuel',animales:'Animales',lector:'Lector BLE',sanidad:'Sanidad',detalle:'Ficha animal','nuevo-animal':'Nuevo animal'};
   document.getElementById('m-topbar-title').textContent=t[id]||'';
   document.getElementById('m-topbar-action').innerHTML=id==='animales'?'<button class="header-action" onclick="mShowScreen(\'nuevo-animal\')">+ Nuevo</button>':'';
+  if(id==='lector'){const i=document.getElementById('m-caravana-input');if(i){i.value='';document.getElementById('m-lector-resultado').innerHTML='';setTimeout(()=>i.focus(),150);}}
 }
 
 function dShowScreen(id){
@@ -1243,6 +1246,7 @@ function dShowScreen(id){
   if(id==='cuadros')dRenderCuadros();
   if(id==='pesajes')dRenderPesajes();
   if(id==='servicios')dRenderServicios();
+  if(id==='lector'){const i=document.getElementById('d-caravana-input');if(i){i.value='';document.getElementById('d-lector-resultado').innerHTML='';setTimeout(()=>i.focus(),150);}}
 }
 
 loadAll();
