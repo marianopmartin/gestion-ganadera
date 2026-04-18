@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f0f0f">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" href="./icon-192.png">
@@ -422,16 +423,15 @@ let isSyncing = false;
 
 function updateStatusUI() {
   const pending = pendingCount;
+  let dotClass = 'status-dot';
+  let label = 'conectado';
+  if (isSyncing) { dotClass += ' syncing'; label = 'sincronizando...'; }
+  else if (!isOnline) { dotClass += ' offline'; label = 'offline'; }
+  if (pending > 0) label += ` · ${pending} pendiente${pending>1?'s':''}`;
   ['m','d'].forEach(p => {
-    const dot = document.getElementById(p+'-status-dot');
     const txt = document.getElementById(p+'-status-text');
-    if (!dot || !txt) return;
-    dot.className = 'status-dot';
-    let label = 'conectado';
-    if (isSyncing) { dot.classList.add('syncing'); label = 'sincronizando...'; }
-    else if (!isOnline) { dot.classList.add('offline'); label = 'offline'; }
-    if (pending > 0) label += ` · ${pending} pendiente${pending>1?'s':''}`;
-    txt.innerHTML = '<span class="status-dot ' + dot.className.replace('status-dot','').trim() + '"></span>' + label;
+    if (!txt) return;
+    txt.innerHTML = `<span class="${dotClass}" id="${p}-status-dot"></span>${label}`;
   });
 }
 
