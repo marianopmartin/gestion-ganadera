@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f0f">
 <title>Campo Ganadero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,9 +23,8 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
 button{font-family:var(--font);cursor:pointer;border:none;background:none;color:inherit;}
-input,select{font-family:var(--font);font-size:14px;}
+input,select,textarea{font-family:var(--font);font-size:14px;}
 
-/* MOBILE */
 .mobile-app{display:flex;flex-direction:column;min-height:100vh;}
 .desktop-app{display:none;}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:10;}
@@ -40,7 +38,6 @@ input,select{font-family:var(--font);font-size:14px;}
 .bar-label{font-size:9px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;}
 .bar-btn.active .bar-label{color:var(--accent);}
 
-/* DESKTOP */
 @media(min-width:768px){
   .mobile-app{display:none;}
   .desktop-app{display:flex;min-height:100vh;}
@@ -48,11 +45,12 @@ input,select{font-family:var(--font);font-size:14px;}
   .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);}
   .sidebar-logo-title{font-size:15px;font-weight:500;}
   .sidebar-logo-sub{font-size:11px;color:var(--text2);margin-top:2px;font-family:var(--font-mono);}
-  .sidebar-nav{flex:1;padding:12px 10px;}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);font-size:13px;color:var(--text2);cursor:pointer;transition:all 0.15s;margin-bottom:2px;width:100%;text-align:left;}
+  .sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto;}
+  .nav-group{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;padding:14px 12px 6px;font-weight:500;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);font-size:13px;color:var(--text2);cursor:pointer;margin-bottom:2px;width:100%;text-align:left;}
   .nav-item:hover{background:var(--bg3);color:var(--text);}
   .nav-item.active{background:var(--bg3);color:var(--text);font-weight:500;}
-  .nav-icon{font-size:16px;width:20px;text-align:center;}
+  .nav-icon{font-size:15px;width:18px;text-align:center;}
   .sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:var(--font-mono);}
   .d-main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
   .d-topbar{padding:20px 32px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:10;}
@@ -85,10 +83,9 @@ input,select{font-family:var(--font);font-size:14px;}
   .d-alert-sub{font-size:12px;color:var(--text2);margin-top:3px;}
 }
 
-/* SHARED */
 .screen{display:none;}.screen.active{display:block;}
 .section{padding:0 16px 20px;}
-.section-title{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin:20px 0 10px;}
+.section-title{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin:20px 0 10px;display:flex;justify-content:space-between;align-items:center;}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 16px 4px;}
 .metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
 .metric-val{font-size:28px;font-weight:300;line-height:1;margin-bottom:4px;}
@@ -134,18 +131,16 @@ input,select{font-family:var(--font);font-size:14px;}
 .form-input:focus{border-color:var(--text2);}
 .form-input::placeholder{color:var(--text3);}
 select.form-input option{background:var(--bg2);}
+textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
 .btn{width:100%;padding:13px;border-radius:var(--radius);font-size:14px;font-weight:500;margin-top:8px;}
 .btn-primary{background:var(--text);color:var(--bg);}
 .btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border2);}
 .btn-sm{width:auto;padding:8px 16px;font-size:12px;margin-top:0;}
+.btn-add{background:none;border:1px solid var(--border2);color:var(--accent);font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;}
 .ble-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;text-align:center;margin-bottom:16px;}
 .ble-icon{font-size:32px;margin-bottom:10px;}
 .ble-title{font-size:15px;font-weight:500;margin-bottom:4px;}
 .ble-sub{font-size:12px;color:var(--text2);}
-.scan-box{background:var(--green-bg);border:1px solid rgba(74,222,128,0.2);border-radius:var(--radius);padding:16px;margin-bottom:12px;display:none;}
-.scan-box.visible{display:block;}
-.scan-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
-.scan-num{font-size:22px;font-weight:500;color:var(--green);font-family:var(--font-mono);}
 .timeline{padding-left:20px;position:relative;}
 .tl-line{position:absolute;left:6px;top:6px;bottom:6px;width:1px;background:var(--border2);}
 .tl-item{position:relative;padding:0 0 16px 16px;}
@@ -158,9 +153,21 @@ select.form-input option{background:var(--bg2);}
 .empty{text-align:center;padding:20px;color:var(--text3);font-size:13px;}
 .header-action{font-size:13px;color:var(--accent);}
 .mono{font-family:var(--font-mono);font-size:12px;}
+.msg-ok{color:var(--green);}
+.msg-err{color:var(--red);}
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.active{display:flex;}
+.modal{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);max-width:500px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;}
+.modal-title{font-size:16px;font-weight:500;margin-bottom:16px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 </style>
 </head>
 <body>
+
+<!-- MODAL GLOBAL -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
 
 <!-- MOBILE -->
 <div class="mobile-app">
@@ -178,7 +185,8 @@ select.form-input option{background:var(--bg2);}
       </div>
       <div class="section">
         <div class="section-title">Alertas</div><div id="m-alertas"></div>
-        <div class="section-title">Cuadros</div><div id="m-cuadros"></div>
+        <div class="section-title">Cuadros <button class="btn-add" onclick="abrirModalCuadro()">+ Nuevo</button></div>
+        <div id="m-cuadros"></div>
       </div>
     </div>
     <div id="m-screen-animales" class="screen">
@@ -240,12 +248,17 @@ select.form-input option{background:var(--bg2);}
     <nav class="sidebar-nav">
       <button class="nav-item active" id="d-nav-dashboard" onclick="dShowScreen('dashboard')"><span class="nav-icon">⌂</span>Dashboard</button>
       <button class="nav-item" id="d-nav-animales" onclick="dShowScreen('animales')"><span class="nav-icon">♦</span>Animales</button>
+      <button class="nav-item" id="d-nav-cuadros" onclick="dShowScreen('cuadros')"><span class="nav-icon">▦</span>Cuadros</button>
       <button class="nav-item" id="d-nav-lector" onclick="dShowScreen('lector')"><span class="nav-icon">◉</span>Lector BLE</button>
+      <div class="nav-group">Gestión</div>
       <button class="nav-item" id="d-nav-sanidad" onclick="dShowScreen('sanidad')"><span class="nav-icon">✚</span>Sanidad</button>
+      <button class="nav-item" id="d-nav-pesajes" onclick="dShowScreen('pesajes')"><span class="nav-icon">⚖</span>Pesajes</button>
       <button class="nav-item" id="d-nav-pariciones" onclick="dShowScreen('pariciones')"><span class="nav-icon">◈</span>Pariciones</button>
+      <button class="nav-item" id="d-nav-servicios" onclick="dShowScreen('servicios')"><span class="nav-icon">♂</span>Servicios</button>
+      <div class="nav-group">Registro</div>
       <button class="nav-item" id="d-nav-nuevo-animal" onclick="dShowScreen('nuevo-animal')"><span class="nav-icon">+</span>Nuevo animal</button>
     </nav>
-    <div class="sidebar-footer">v1.0 · Supabase</div>
+    <div class="sidebar-footer">v1.1 · Supabase</div>
   </div>
   <div class="d-main">
     <div class="d-topbar">
@@ -253,40 +266,56 @@ select.form-input option{background:var(--bg2);}
       <div id="d-topbar-action"></div>
     </div>
     <div class="d-content">
+
       <div id="d-screen-dashboard" class="d-screen active">
         <div class="d-metrics">
           <div class="d-metric"><div class="d-metric-val" id="d-total">—</div><div class="d-metric-label">Animales activos</div></div>
-          <div class="d-metric"><div class="d-metric-val" id="d-pariciones">—</div><div class="d-metric-label">Pariciones totales</div></div>
-          <div class="d-metric"><div class="d-metric-val" id="d-peso">—</div><div class="d-metric-label">Peso promedio (kg)</div><div class="d-metric-sub">último pesaje</div></div>
+          <div class="d-metric"><div class="d-metric-val" id="d-pariciones">—</div><div class="d-metric-label">Pariciones</div></div>
+          <div class="d-metric"><div class="d-metric-val" id="d-peso">—</div><div class="d-metric-label">Peso promedio (kg)</div></div>
           <div class="d-metric"><div class="d-metric-val" id="d-servicio">—</div><div class="d-metric-label">Hembras en servicio</div></div>
         </div>
         <div class="d-grid2">
           <div class="d-card"><div class="d-card-title">Alertas</div><div id="d-alertas"><div class="loading">Cargando...</div></div></div>
-          <div class="d-card"><div class="d-card-title">Cuadros</div><div id="d-cuadros"><div class="loading">Cargando...</div></div></div>
+          <div class="d-card"><div class="d-card-title" style="display:flex;justify-content:space-between;align-items:center">Cuadros <button class="btn-add" onclick="abrirModalCuadro()">+ Nuevo</button></div><div id="d-cuadros"><div class="loading">Cargando...</div></div></div>
         </div>
       </div>
+
       <div id="d-screen-animales" class="d-screen">
         <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center;flex-wrap:wrap">
           <input class="form-input" type="search" placeholder="Buscar caravana..." id="d-search" oninput="dRenderAnimales()" style="max-width:260px">
           <select class="form-input" id="d-filtro-sexo" onchange="dRenderAnimales()" style="max-width:140px"><option value="todos">Todos</option><option value="hembra">Hembras</option><option value="macho">Machos</option></select>
+          <select class="form-input" id="d-filtro-cuadro" onchange="dRenderAnimales()" style="max-width:180px"><option value="todos">Todos los cuadros</option></select>
           <button class="btn btn-primary btn-sm" onclick="dShowScreen('nuevo-animal')">+ Nuevo animal</button>
         </div>
         <div class="d-card" style="padding:0;overflow:hidden">
-          <table class="d-table"><thead><tr><th>Caravana</th><th>Sexo</th><th>Raza</th><th>Edad</th><th>Cuadro</th><th>Estado</th></tr></thead>
-          <tbody id="d-animales-tbody"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody></table>
+          <table class="d-table"><thead><tr><th>Caravana</th><th>Sexo</th><th>Raza</th><th>Edad</th><th>Cuadro</th><th>Último peso</th><th>Estado</th></tr></thead>
+          <tbody id="d-animales-tbody"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
+
+      <div id="d-screen-cuadros" class="d-screen">
+        <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
+          <button class="btn btn-primary btn-sm" onclick="abrirModalCuadro()">+ Nuevo cuadro</button>
+        </div>
+        <div class="d-card" style="padding:0;overflow:hidden">
+          <table class="d-table"><thead><tr><th>Nombre</th><th>Hectáreas</th><th>Descripción</th><th>Animales</th></tr></thead>
+          <tbody id="d-cuadros-tbody"><tr><td colspan="4" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
       <div id="d-screen-lector" class="d-screen">
         <div style="max-width:480px">
-          <div class="ble-card"><div class="ble-icon">⬡</div><div class="ble-title">Listo para escanear</div><div class="ble-sub">El lector escribe la caravana automáticamente en el campo de abajo</div></div>
+          <div class="ble-card"><div class="ble-icon">⬡</div><div class="ble-title">Listo para escanear</div><div class="ble-sub">El lector escribe la caravana automáticamente</div></div>
           <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="d-caravana-input" placeholder="AR000000000" style="font-family:var(--font-mono);font-size:18px"></div>
           <button class="btn btn-primary" onclick="buscarCaravana('d')">Buscar animal</button>
           <div id="d-lector-resultado" style="margin-top:16px"></div>
         </div>
       </div>
+
       <div id="d-screen-sanidad" class="d-screen">
         <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
-          <select class="form-input" id="d-filtro-sanidad" onchange="dRenderSanidad()" style="max-width:200px"><option value="todos">Todos los tipos</option><option value="brucelosis">Brucelosis</option><option value="sauaipe">Sauaipe</option><option value="antipulgas">Antipulgas</option></select>
+          <select class="form-input" id="d-filtro-sanidad" onchange="dRenderSanidad()" style="max-width:200px"><option value="todos">Todos los tipos</option><option value="brucelosis">Brucelosis</option><option value="sauaipe">Sauaipe</option><option value="antipulgas">Antipulgas</option><option value="vacuna">Vacuna</option></select>
+          <button class="btn btn-primary btn-sm" onclick="abrirModalSanidad()">+ Registrar sanidad</button>
         </div>
         <div id="d-sanidad-alertas" style="margin-bottom:16px"></div>
         <div class="d-card" style="padding:0;overflow:hidden">
@@ -294,23 +323,49 @@ select.form-input option{background:var(--bg2);}
           <tbody id="d-sanidad-tbody"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
+
+      <div id="d-screen-pesajes" class="d-screen">
+        <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
+          <button class="btn btn-primary btn-sm" onclick="abrirModalPesaje()">+ Registrar pesaje</button>
+        </div>
+        <div class="d-card" style="padding:0;overflow:hidden">
+          <table class="d-table"><thead><tr><th>Animal</th><th>Peso (kg)</th><th>Fecha</th><th>Observaciones</th></tr></thead>
+          <tbody id="d-pesajes-tbody"><tr><td colspan="4" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
       <div id="d-screen-pariciones" class="d-screen">
+        <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
+          <button class="btn btn-primary btn-sm" onclick="abrirModalParicion()">+ Registrar parición</button>
+        </div>
         <div class="d-card" style="padding:0;overflow:hidden">
           <table class="d-table"><thead><tr><th>Madre</th><th>Cría</th><th>Fecha parto</th><th>Resultado</th><th>Observaciones</th></tr></thead>
           <tbody id="d-pariciones-tbody"><tr><td colspan="5" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
+
+      <div id="d-screen-servicios" class="d-screen">
+        <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
+          <button class="btn btn-primary btn-sm" onclick="abrirModalServicio()">+ Registrar servicio</button>
+        </div>
+        <div class="d-card" style="padding:0;overflow:hidden">
+          <table class="d-table"><thead><tr><th>Toro</th><th>Cuadro</th><th>Entrada</th><th>Salida</th><th>Temporada</th></tr></thead>
+          <tbody id="d-servicios-tbody"><tr><td colspan="5" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+
       <div id="d-screen-detalle" class="d-screen"><div id="d-detalle-content"><div class="loading">Cargando...</div></div></div>
+
       <div id="d-screen-nuevo-animal" class="d-screen">
         <div style="max-width:540px">
           <div class="d-card">
             <div class="d-card-title">Datos del animal</div>
             <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="d-new-caravana" placeholder="AR000000000" style="font-family:var(--font-mono)"></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="row2">
               <div class="form-group"><label class="form-label">Sexo</label><select class="form-input" id="d-new-sexo"><option value="">Seleccionar...</option><option value="hembra">Hembra</option><option value="macho">Macho</option></select></div>
               <div class="form-group"><label class="form-label">Raza</label><input class="form-input" type="text" id="d-new-raza" placeholder="Angus..."></div>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="row2">
               <div class="form-group"><label class="form-label">Fecha nacimiento</label><input class="form-input" type="date" id="d-new-fecha"></div>
               <div class="form-group"><label class="form-label">Peso al nacer (kg)</label><input class="form-input" type="number" id="d-new-peso" placeholder="0"></div>
             </div>
@@ -320,6 +375,7 @@ select.form-input option{background:var(--bg2);}
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </div>
@@ -331,25 +387,28 @@ const sb = supabase.createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlanF3ZHZya3B2ZWJpeXNzc2l6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjUyMTYsImV4cCI6MjA5MjA0MTIxNn0.H9elvh6PP08fbG6N3lcOTt5jY0zmzbMyxbxfSvWZGXg'
 );
 
-let allAnimales=[],allSanidad=[],allPariciones=[],allCuadros=[];
+let allAnimales=[],allSanidad=[],allPariciones=[],allCuadros=[],allPesajes=[],allServicios=[];
 let mFiltroAnimal='todos',mFiltroSanidad='todos',mPrevScreen='dashboard';
 
 const calcEdad=f=>{const d=new Date(f),h=new Date(),m=(h.getFullYear()-d.getFullYear())*12+h.getMonth()-d.getMonth();return m<12?m+' m':Math.floor(m/12)+' años';};
 const badgeSan=v=>{if(!v)return'<span class="badge bb">OK</span>';const d=Math.ceil((new Date(v)-new Date())/86400000);return d<0?'<span class="badge br">Vencido</span>':d<=30?'<span class="badge br">Por vencer</span>':'<span class="badge bg">Vigente</span>';};
 
 async function loadAll(){
-  const[a,s,p,c,par]=await Promise.all([
+  const[a,s,p,c,par,srv]=await Promise.all([
     sb.from('animales').select('*,cuadros(nombre)').eq('estado','activo').order('caravana_senasa'),
-    sb.from('sanidad').select('*,animales(caravana_senasa)').order('fecha',{ascending:false}).limit(100),
-    sb.from('pesajes').select('peso_kg').order('fecha',{ascending:false}).limit(30),
-    sb.from('cuadros').select('*'),
-    sb.from('pariciones').select('*,madre:animales!pariciones_madre_id_fkey(caravana_senasa),cria:animales!pariciones_cria_id_fkey(caravana_senasa)').order('fecha_parto',{ascending:false})
+    sb.from('sanidad').select('*,animales(caravana_senasa)').order('fecha',{ascending:false}).limit(200),
+    sb.from('pesajes').select('*,animales(caravana_senasa)').order('fecha',{ascending:false}).limit(200),
+    sb.from('cuadros').select('*').order('nombre'),
+    sb.from('pariciones').select('*,madre:animales!pariciones_madre_id_fkey(caravana_senasa),cria:animales!pariciones_cria_id_fkey(caravana_senasa)').order('fecha_parto',{ascending:false}),
+    sb.from('servicios').select('*,toro:animales(caravana_senasa),cuadros(nombre)').order('fecha_entrada',{ascending:false})
   ]);
-  allAnimales=a.data||[];allSanidad=s.data||[];allCuadros=c.data||[];allPariciones=par.data||[];
-  const avgPeso=p.data?.length?Math.round(p.data.reduce((s,x)=>s+x.peso_kg,0)/p.data.length):'—';
-  const{data:srv}=await sb.from('servicios').select('cuadro_id').is('fecha_salida',null);
-  const ctoro=srv?.map(s=>s.cuadro_id)||[];
+  allAnimales=a.data||[];allSanidad=s.data||[];allPesajes=p.data||[];allCuadros=c.data||[];allPariciones=par.data||[];allServicios=srv.data||[];
+  
+  const avgPeso=allPesajes.length?Math.round(allPesajes.slice(0,30).reduce((s,x)=>s+x.peso_kg,0)/Math.min(allPesajes.length,30)):'—';
+  const activosSrv=allServicios.filter(s=>!s.fecha_salida);
+  const ctoro=activosSrv.map(s=>s.cuadro_id);
   const enSrv=allAnimales.filter(a=>a.sexo==='hembra'&&ctoro.includes(a.cuadro_id)).length;
+  
   ['m','d'].forEach(p=>{
     const el=id=>document.getElementById(p+'-'+id);
     if(el('total'))el('total').textContent=allAnimales.length;
@@ -357,6 +416,7 @@ async function loadAll(){
     if(el('peso'))el('peso').textContent=avgPeso;
     if(el('servicio'))el('servicio').textContent=enSrv;
   });
+  
   const b30=allSanidad.filter(s=>s.tipo==='brucelosis'&&s.fecha_vencimiento&&Math.ceil((new Date(s.fecha_vencimiento)-new Date())/86400000)<=30&&Math.ceil((new Date(s.fecha_vencimiento)-new Date())/86400000)>=0);
   const b60=allSanidad.filter(s=>s.tipo==='brucelosis'&&s.fecha_vencimiento&&Math.ceil((new Date(s.fecha_vencimiento)-new Date())/86400000)>30&&Math.ceil((new Date(s.fecha_vencimiento)-new Date())/86400000)<=60);
   let ah='';
@@ -364,23 +424,33 @@ async function loadAll(){
   if(b60.length)ah+=`<div class="alert alert-a"><div class="alert-title">Brucelosis — 30 a 60 días</div><div class="alert-sub">${b60.length} animal${b60.length>1?'es':''}</div></div>`;
   if(!ah)ah='<div class="alert alert-b"><div class="alert-title">Sin alertas urgentes</div><div class="alert-sub">Todo en orden</div></div>';
   document.getElementById('m-alertas').innerHTML=ah;
-  const dah=ah.replace(/class="alert /g,'class="d-alert ').replace(/class="alert-title"/g,'class="d-alert-title"').replace(/class="alert-sub"/g,'class="d-alert-sub"').replace(/alert-r/g,'d-alert-r').replace(/alert-a/g,'d-alert-a').replace(/alert-b/g,'d-alert-b');
-  document.getElementById('d-alertas').innerHTML=dah;
+  document.getElementById('d-alertas').innerHTML=ah.replace(/class="alert /g,'class="d-alert ').replace(/class="alert-title"/g,'class="d-alert-title"').replace(/class="alert-sub"/g,'class="d-alert-sub"').replace(/alert-r/g,'d-alert-r').replace(/alert-a/g,'d-alert-a').replace(/alert-b/g,'d-alert-b');
+  
   let ch='',dch='';
   allCuadros.forEach(c=>{
     const cnt=allAnimales.filter(a=>a.cuadro_id===c.id).length;
     ch+=`<div class="list-item"><div class="avatar av-c">${c.nombre.charAt(0)}</div><div><div class="item-name">${c.nombre}</div><div class="item-sub">${c.hectareas||'—'} ha</div></div><div class="item-right"><div style="font-size:13px;font-weight:500">${cnt}</div><div class="item-meta">animales</div></div></div>`;
     dch+=`<div class="detail-row"><span class="detail-key">${c.nombre}</span><span class="detail-val">${cnt} animales · ${c.hectareas||'—'} ha</span></div>`;
   });
-  document.getElementById('m-cuadros').innerHTML=ch||'<div class="empty">Sin cuadros</div>';
-  document.getElementById('d-cuadros').innerHTML=dch||'<div class="empty">Sin cuadros</div>';
-  mRenderAnimales();dRenderAnimales();mRenderSanidad();dRenderSanidad();dRenderPariciones();
-  allCuadros.forEach(c=>{
-    ['m-new-cuadro','d-new-cuadro'].forEach(sid=>{
-      const sel=document.getElementById(sid);if(!sel)return;
-      const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;sel.appendChild(o);
-    });
+  document.getElementById('m-cuadros').innerHTML=ch||'<div class="empty">Sin cuadros registrados</div>';
+  document.getElementById('d-cuadros').innerHTML=dch||'<div class="empty">Sin cuadros registrados</div>';
+  
+  mRenderAnimales();dRenderAnimales();mRenderSanidad();dRenderSanidad();dRenderPariciones();dRenderCuadros();dRenderPesajes();dRenderServicios();
+  llenarSelects();
+}
+
+function llenarSelects(){
+  ['m-new-cuadro','d-new-cuadro','d-filtro-cuadro'].forEach(sid=>{
+    const sel=document.getElementById(sid);if(!sel)return;
+    const first=sid==='d-filtro-cuadro'?'<option value="todos">Todos los cuadros</option>':'<option value="">Sin asignar</option>';
+    sel.innerHTML=first;
+    allCuadros.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;sel.appendChild(o);});
   });
+}
+
+function ultimoPeso(animalId){
+  const p=allPesajes.find(x=>x.animal_id===animalId);
+  return p?p.peso_kg+' kg':'—';
 }
 
 function mRenderAnimales(){
@@ -395,9 +465,11 @@ function dRenderAnimales(){
   let l=allAnimales;
   const q=document.getElementById('d-search')?.value?.toLowerCase();
   const f=document.getElementById('d-filtro-sexo')?.value;
+  const fc=document.getElementById('d-filtro-cuadro')?.value;
   if(f&&f!=='todos')l=l.filter(a=>a.sexo===f);
+  if(fc&&fc!=='todos')l=l.filter(a=>a.cuadro_id===fc);
   if(q)l=l.filter(a=>a.caravana_senasa.toLowerCase().includes(q));
-  document.getElementById('d-animales-tbody').innerHTML=l.length?l.map(a=>`<tr onclick="verAnimal('${a.id}','d')"><td class="mono">${a.caravana_senasa}</td><td>${a.sexo}</td><td>${a.raza||'—'}</td><td>${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</td><td>${a.cuadros?.nombre||'Sin cuadro'}</td><td><span class="badge bg">${a.estado}</span></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Sin resultados</td></tr>';
+  document.getElementById('d-animales-tbody').innerHTML=l.length?l.map(a=>`<tr onclick="verAnimal('${a.id}','d')"><td class="mono">${a.caravana_senasa}</td><td>${a.sexo}</td><td>${a.raza||'—'}</td><td>${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</td><td>${a.cuadros?.nombre||'Sin cuadro'}</td><td class="mono">${ultimoPeso(a.id)}</td><td><span class="badge bg">${a.estado}</span></td></tr>`).join(''):'<tr><td colspan="7" class="empty">Sin resultados</td></tr>';
 }
 
 function mFiltrar(f,btn){mFiltroAnimal=f;document.querySelectorAll('#m-screen-animales .tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mRenderAnimales();}
@@ -425,8 +497,23 @@ function dRenderPariciones(){
   document.getElementById('d-pariciones-tbody').innerHTML=allPariciones.length?allPariciones.map(p=>`<tr><td class="mono">${p.madre?.caravana_senasa||'—'}</td><td class="mono">${p.cria?.caravana_senasa||'—'}</td><td class="mono">${p.fecha_parto}</td><td>${p.resultado||'—'}</td><td>${p.observaciones||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">Sin pariciones registradas</td></tr>';
 }
 
+function dRenderCuadros(){
+  document.getElementById('d-cuadros-tbody').innerHTML=allCuadros.length?allCuadros.map(c=>{
+    const cnt=allAnimales.filter(a=>a.cuadro_id===c.id).length;
+    return `<tr><td>${c.nombre}</td><td class="mono">${c.hectareas||'—'}</td><td>${c.descripcion||'—'}</td><td class="mono">${cnt}</td></tr>`;
+  }).join(''):'<tr><td colspan="4" class="empty">Sin cuadros</td></tr>';
+}
+
+function dRenderPesajes(){
+  document.getElementById('d-pesajes-tbody').innerHTML=allPesajes.length?allPesajes.map(p=>`<tr><td class="mono">${p.animales?.caravana_senasa||'—'}</td><td class="mono">${p.peso_kg}</td><td class="mono">${p.fecha}</td><td>${p.observaciones||'—'}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">Sin pesajes registrados</td></tr>';
+}
+
+function dRenderServicios(){
+  document.getElementById('d-servicios-tbody').innerHTML=allServicios.length?allServicios.map(s=>`<tr><td class="mono">${s.toro?.caravana_senasa||'—'}</td><td>${s.cuadros?.nombre||'—'}</td><td class="mono">${s.fecha_entrada}</td><td class="mono">${s.fecha_salida||'—'}</td><td>${s.temporada||'—'}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">Sin servicios registrados</td></tr>';
+}
+
 async function verAnimal(id,ctx){
-  if(ctx==='m'){mPrevScreen=document.querySelector('#m-screen-animales.active')?'animales':'dashboard';mShowScreen('detalle');document.getElementById('m-detalle-content').innerHTML='<div class="loading">Cargando...</div>';}
+  if(ctx==='m'){mPrevScreen='animales';mShowScreen('detalle');document.getElementById('m-detalle-content').innerHTML='<div class="loading">Cargando...</div>';}
   else{dShowScreen('detalle');document.getElementById('d-detalle-content').innerHTML='<div class="loading">Cargando...</div>';}
   const[{data:a},{data:ps},{data:san},{data:par}]=await Promise.all([
     sb.from('animales').select('*,cuadros(nombre)').eq('id',id).single(),
@@ -443,20 +530,20 @@ async function verAnimal(id,ctx){
     <div class="detail-row"><span class="detail-key">Edad</span><span class="detail-val">${a.fecha_nacimiento?calcEdad(a.fecha_nacimiento):'—'}</span></div>
     <div class="detail-row"><span class="detail-key">Último peso</span><span class="detail-val">${ps?.[0]?.peso_kg||'—'} kg</span></div>
   </div>
-  <div class="card"><div class="card-title">Sanidad</div>
+  <div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Pesajes <button class="btn-add" onclick="abrirModalPesaje('${a.id}')">+ Nuevo</button></div>${phm}</div>
+  <div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Sanidad <button class="btn-add" onclick="abrirModalSanidad('${a.id}')">+ Nuevo</button></div>
     <div class="detail-row"><span class="detail-key">Brucelosis</span>${bruc?badgeSan(bruc.fecha_vencimiento):'<span class="badge ba">Sin registro</span>'}</div>
     ${bruc?`<div class="detail-row"><span class="detail-key">Vence</span><span class="detail-val">${bruc.fecha_vencimiento}</span></div>`:''}
-    <div class="detail-row"><span class="detail-key">Antiparasitario</span>${san?.find(s=>s.tipo==='sauaipe')?'<span class="badge bg">OK</span>':'<span class="badge ba">Pendiente</span>'}</div>
+    <div class="detail-row"><span class="detail-key">Sauaipe</span>${san?.find(s=>s.tipo==='sauaipe')?'<span class="badge bg">OK</span>':'<span class="badge ba">Pendiente</span>'}</div>
     <div class="detail-row"><span class="detail-key">Antipulgas</span>${san?.find(s=>s.tipo==='antipulgas')?'<span class="badge bg">OK</span>':'<span class="badge ba">Pendiente</span>'}</div>
   </div>
-  <div class="card"><div class="card-title">Pesajes</div>${phm}</div>
-  ${a.sexo==='hembra'?`<div class="card"><div class="card-title">Pariciones</div>${parh}</div>`:''}
+  ${a.sexo==='hembra'?`<div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Pariciones <button class="btn-add" onclick="abrirModalParicion('${a.id}')">+ Nuevo</button></div>${parh}</div>`:''}
   <button class="btn btn-secondary" onclick="${ctx==='m'?`mShowScreen('${mPrevScreen}')`:`dShowScreen('animales')`}" style="margin-top:4px">← Volver</button>`;
   document.getElementById(ctx==='m'?'m-detalle-content':'d-detalle-content').innerHTML=html;
 }
 
 async function buscarCaravana(ctx){
-  const v=document.getElementById(ctx+'-caravana-input').value.trim().replace(/\s/g,'');
+  const v=document.getElementById(ctx+'-caravana-input').value.trim();
   if(!v)return;
   const{data}=await sb.from('animales').select('*').ilike('caravana_senasa',v).maybeSingle();
   const el=document.getElementById(ctx+'-lector-resultado');
@@ -468,12 +555,186 @@ async function guardarAnimal(ctx){
   const g=id=>document.getElementById(ctx+'-new-'+id)?.value;
   const caravana=g('caravana')?.trim(),sexo=g('sexo');
   const msg=document.getElementById(ctx+'-nuevo-msg');
-  if(!caravana||!sexo){msg.textContent='Caravana y sexo son obligatorios';msg.style.color='var(--red)';return;}
-  const{error}=await sb.from('animales').insert({caravana_senasa:caravana.replace(/\s/g,''),sexo,raza:g('raza')||null,fecha_nacimiento:g('fecha')||null,peso_nacimiento:g('peso')?parseFloat(g('peso')):null,cuadro_id:g('cuadro')||null,estado:'activo'});
-  if(error){msg.textContent='Error: '+error.message;msg.style.color='var(--red)';return;}
-  msg.textContent='Animal guardado';msg.style.color='var(--green)';
+  if(!caravana||!sexo){msg.textContent='Caravana y sexo son obligatorios';msg.className='msg-err';return;}
+  const{error}=await sb.from('animales').insert({caravana_senasa:caravana,sexo,raza:g('raza')||null,fecha_nacimiento:g('fecha')||null,peso_nacimiento:g('peso')?parseFloat(g('peso')):null,cuadro_id:g('cuadro')||null,estado:'activo'});
+  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
+  msg.textContent='Animal guardado';msg.className='msg-ok';
   await loadAll();
-  setTimeout(()=>ctx==='m'?mShowScreen('animales'):dShowScreen('animales'),1200);
+  setTimeout(()=>ctx==='m'?mShowScreen('animales'):dShowScreen('animales'),1000);
+}
+
+// ============ MODALES ============
+function closeModal(){document.getElementById('modal-bg').classList.remove('active');}
+function openModal(html){document.getElementById('modal-content').innerHTML=html;document.getElementById('modal-bg').classList.add('active');}
+
+function abrirModalCuadro(){
+  openModal(`
+    <div class="modal-title">Nuevo cuadro</div>
+    <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" type="text" id="mod-nombre" placeholder="Cuadro Norte"></div>
+    <div class="form-group"><label class="form-label">Hectáreas</label><input class="form-input" type="number" step="0.01" id="mod-hectareas" placeholder="120"></div>
+    <div class="form-group"><label class="form-label">Descripción</label><textarea class="form-input" id="mod-descripcion" placeholder="Pastizal natural..."></textarea></div>
+    <button class="btn btn-primary" onclick="guardarCuadro()">Guardar</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <div id="mod-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
+  `);
+}
+
+async function guardarCuadro(){
+  const msg=document.getElementById('mod-msg');
+  const nombre=document.getElementById('mod-nombre').value.trim();
+  if(!nombre){msg.textContent='Nombre obligatorio';msg.className='msg-err';return;}
+  const{error}=await sb.from('cuadros').insert({nombre,hectareas:parseFloat(document.getElementById('mod-hectareas').value)||null,descripcion:document.getElementById('mod-descripcion').value||null});
+  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
+  msg.textContent='Cuadro guardado';msg.className='msg-ok';
+  await loadAll();
+  setTimeout(closeModal,800);
+}
+
+function opcionesAnimales(selectedId){
+  return allAnimales.map(a=>`<option value="${a.id}" ${a.id===selectedId?'selected':''}>${a.caravana_senasa} · ${a.sexo}</option>`).join('');
+}
+
+function abrirModalPesaje(animalId){
+  const hoy=new Date().toISOString().split('T')[0];
+  openModal(`
+    <div class="modal-title">Registrar pesaje</div>
+    <div class="form-group"><label class="form-label">Animal</label><select class="form-input" id="mod-animal"><option value="">Seleccionar...</option>${opcionesAnimales(animalId)}</select></div>
+    <div class="row2">
+      <div class="form-group"><label class="form-label">Peso (kg)</label><input class="form-input" type="number" step="0.1" id="mod-peso" placeholder="300"></div>
+      <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="mod-fecha" value="${hoy}"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-input" id="mod-obs" placeholder="Opcional"></textarea></div>
+    <button class="btn btn-primary" onclick="guardarPesaje()">Guardar</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <div id="mod-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
+  `);
+}
+
+async function guardarPesaje(){
+  const msg=document.getElementById('mod-msg');
+  const animal_id=document.getElementById('mod-animal').value;
+  const peso=parseFloat(document.getElementById('mod-peso').value);
+  const fecha=document.getElementById('mod-fecha').value;
+  if(!animal_id||!peso||!fecha){msg.textContent='Animal, peso y fecha son obligatorios';msg.className='msg-err';return;}
+  const{error}=await sb.from('pesajes').insert({animal_id,peso_kg:peso,fecha,observaciones:document.getElementById('mod-obs').value||null});
+  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
+  msg.textContent='Pesaje guardado';msg.className='msg-ok';
+  await loadAll();
+  const screen=document.querySelector('.d-screen.active')?.id||document.querySelector('.screen.active')?.id;
+  if(screen&&screen.includes('detalle')){const id=allAnimales.find(a=>a.id===animal_id);if(id)verAnimal(animal_id,screen.startsWith('m-')?'m':'d');}
+  setTimeout(closeModal,800);
+}
+
+function abrirModalSanidad(animalId){
+  const hoy=new Date().toISOString().split('T')[0];
+  openModal(`
+    <div class="modal-title">Registrar sanidad</div>
+    <div class="form-group"><label class="form-label">Animal</label><select class="form-input" id="mod-animal"><option value="">Seleccionar...</option>${opcionesAnimales(animalId)}</select></div>
+    <div class="row2">
+      <div class="form-group"><label class="form-label">Tipo</label><select class="form-input" id="mod-tipo"><option value="">Seleccionar...</option><option value="brucelosis">Brucelosis</option><option value="sauaipe">Sauaipe</option><option value="antipulgas">Antipulgas</option><option value="vacuna">Vacuna</option><option value="otro">Otro</option></select></div>
+      <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="mod-fecha" value="${hoy}"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Producto</label><input class="form-input" type="text" id="mod-producto" placeholder="Nombre del producto"></div>
+    <div class="row2">
+      <div class="form-group"><label class="form-label">Vencimiento</label><input class="form-input" type="date" id="mod-venc"></div>
+      <div class="form-group"><label class="form-label">Lote</label><input class="form-input" type="text" id="mod-lote"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Resultado (Brucelosis)</label><select class="form-input" id="mod-resultado"><option value="">N/A</option><option value="negativo">Negativo</option><option value="positivo">Positivo</option></select></div>
+    <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-input" id="mod-obs"></textarea></div>
+    <button class="btn btn-primary" onclick="guardarSanidad()">Guardar</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <div id="mod-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
+  `);
+}
+
+async function guardarSanidad(){
+  const msg=document.getElementById('mod-msg');
+  const animal_id=document.getElementById('mod-animal').value;
+  const tipo=document.getElementById('mod-tipo').value;
+  const fecha=document.getElementById('mod-fecha').value;
+  if(!animal_id||!tipo||!fecha){msg.textContent='Animal, tipo y fecha son obligatorios';msg.className='msg-err';return;}
+  const{error}=await sb.from('sanidad').insert({
+    animal_id,tipo,fecha,
+    producto:document.getElementById('mod-producto').value||null,
+    fecha_vencimiento:document.getElementById('mod-venc').value||null,
+    lote:document.getElementById('mod-lote').value||null,
+    resultado:document.getElementById('mod-resultado').value||null,
+    observaciones:document.getElementById('mod-obs').value||null
+  });
+  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
+  msg.textContent='Sanidad guardada';msg.className='msg-ok';
+  await loadAll();
+  setTimeout(closeModal,800);
+}
+
+function abrirModalParicion(madreId){
+  const hoy=new Date().toISOString().split('T')[0];
+  const hembras=allAnimales.filter(a=>a.sexo==='hembra');
+  openModal(`
+    <div class="modal-title">Registrar parición</div>
+    <div class="form-group"><label class="form-label">Madre</label><select class="form-input" id="mod-madre"><option value="">Seleccionar...</option>${hembras.map(a=>`<option value="${a.id}" ${a.id===madreId?'selected':''}>${a.caravana_senasa}</option>`).join('')}</select></div>
+    <div class="row2">
+      <div class="form-group"><label class="form-label">Fecha parto</label><input class="form-input" type="date" id="mod-fecha" value="${hoy}"></div>
+      <div class="form-group"><label class="form-label">Resultado</label><select class="form-input" id="mod-resultado"><option value="vivo">Vivo</option><option value="muerto">Muerto</option><option value="gemelar">Gemelar</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Cría (opcional — animal ya registrado)</label><select class="form-input" id="mod-cria"><option value="">No vinculada</option>${allAnimales.map(a=>`<option value="${a.id}">${a.caravana_senasa}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-input" id="mod-obs"></textarea></div>
+    <button class="btn btn-primary" onclick="guardarParicion()">Guardar</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <div id="mod-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
+  `);
+}
+
+async function guardarParicion(){
+  const msg=document.getElementById('mod-msg');
+  const madre_id=document.getElementById('mod-madre').value;
+  const fecha_parto=document.getElementById('mod-fecha').value;
+  if(!madre_id||!fecha_parto){msg.textContent='Madre y fecha son obligatorios';msg.className='msg-err';return;}
+  const{error}=await sb.from('pariciones').insert({
+    madre_id,fecha_parto,
+    cria_id:document.getElementById('mod-cria').value||null,
+    resultado:document.getElementById('mod-resultado').value,
+    observaciones:document.getElementById('mod-obs').value||null
+  });
+  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
+  msg.textContent='Parición guardada';msg.className='msg-ok';
+  await loadAll();
+  setTimeout(closeModal,800);
+}
+
+function abrirModalServicio(){
+  const hoy=new Date().toISOString().split('T')[0];
+  const machos=allAnimales.filter(a=>a.sexo==='macho');
+  openModal(`
+    <div class="modal-title">Registrar servicio (toro)</div>
+    <div class="form-group"><label class="form-label">Toro</label><select class="form-input" id="mod-toro"><option value="">Seleccionar...</option>${machos.map(a=>`<option value="${a.id}">${a.caravana_senasa}</option>`).join('')}</select></div>
+    <div class="form-group"><label class="form-label">Cuadro</label><select class="form-input" id="mod-cuadro"><option value="">Seleccionar...</option>${allCuadros.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('')}</select></div>
+    <div class="row2">
+      <div class="form-group"><label class="form-label">Fecha entrada</label><input class="form-input" type="date" id="mod-entrada" value="${hoy}"></div>
+      <div class="form-group"><label class="form-label">Fecha salida</label><input class="form-input" type="date" id="mod-salida"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Temporada</label><input class="form-input" type="text" id="mod-temporada" placeholder="Dic 2024 - Sep 2025"></div>
+    <button class="btn btn-primary" onclick="guardarServicio()">Guardar</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <div id="mod-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
+  `);
+}
+
+async function guardarServicio(){
+  const msg=document.getElementById('mod-msg');
+  const toro_id=document.getElementById('mod-toro').value;
+  const cuadro_id=document.getElementById('mod-cuadro').value;
+  const fecha_entrada=document.getElementById('mod-entrada').value;
+  if(!toro_id||!cuadro_id||!fecha_entrada){msg.textContent='Toro, cuadro y fecha entrada son obligatorios';msg.className='msg-err';return;}
+  const{error}=await sb.from('servicios').insert({
+    toro_id,cuadro_id,fecha_entrada,
+    fecha_salida:document.getElementById('mod-salida').value||null,
+    temporada:document.getElementById('mod-temporada').value||null
+  });
+  if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
+  msg.textContent='Servicio guardado';msg.className='msg-ok';
+  await loadAll();
+  setTimeout(closeModal,800);
 }
 
 function mShowScreen(id){
@@ -492,12 +753,15 @@ function dShowScreen(id){
   document.getElementById('d-screen-'+id)?.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('d-nav-'+id)?.classList.add('active');
-  const t={dashboard:'Dashboard',animales:'Animales',lector:'Lector BLE',sanidad:'Sanidad',pariciones:'Pariciones',detalle:'Ficha animal','nuevo-animal':'Nuevo animal'};
-  const s={dashboard:'Resumen del campo',animales:'Todos los animales activos',lector:'Escaneá caravanas con el lector BLE',sanidad:'Registros sanitarios',pariciones:'Historial de partos','nuevo-animal':'Registrar un nuevo animal'};
+  const t={dashboard:'Dashboard',animales:'Animales',cuadros:'Cuadros',lector:'Lector BLE',sanidad:'Sanidad',pesajes:'Pesajes',pariciones:'Pariciones',servicios:'Servicios',detalle:'Ficha animal','nuevo-animal':'Nuevo animal'};
+  const s={dashboard:'Resumen del campo',animales:'Todos los animales activos',cuadros:'Potreros del campo',lector:'Escaneá caravanas con el lector BLE',sanidad:'Registros sanitarios',pesajes:'Historial de pesajes',pariciones:'Historial de partos',servicios:'Entrada/salida del toro por cuadro','nuevo-animal':'Registrar un nuevo animal'};
   document.getElementById('d-topbar-title').textContent=t[id]||'';
   document.getElementById('d-topbar-sub').textContent=s[id]||'';
   if(id==='sanidad')dRenderSanidad();
   if(id==='pariciones')dRenderPariciones();
+  if(id==='cuadros')dRenderCuadros();
+  if(id==='pesajes')dRenderPesajes();
+  if(id==='servicios')dRenderServicios();
 }
 
 loadAll();
