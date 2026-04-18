@@ -184,8 +184,8 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
         <div class="metric"><div class="metric-val" id="m-servicio">—</div><div class="metric-label">En servicio</div></div>
       </div>
       <div class="section">
-        <div class="section-title">Alertas</div><div id="m-alertas"></div>
         <div class="section-title">Categorías</div><div id="m-categorias"></div>
+        <div class="section-title">Alertas</div><div id="m-alertas"></div>
         <div class="section-title">Cuadros <button class="btn-add" onclick="abrirModalCuadro()">+ Nuevo</button></div>
         <div id="m-cuadros"></div>
       </div>
@@ -274,11 +274,11 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
           <div class="d-metric"><div class="d-metric-val" id="d-peso">—</div><div class="d-metric-label">Peso promedio (kg)</div></div>
           <div class="d-metric"><div class="d-metric-val" id="d-servicio">—</div><div class="d-metric-label">Hembras en servicio</div></div>
         </div>
+        <div class="d-card" style="margin-bottom:20px"><div class="d-card-title">Animales por categoría</div><div id="d-categorias"><div class="loading">Cargando...</div></div></div>
         <div class="d-grid2">
           <div class="d-card"><div class="d-card-title">Alertas</div><div id="d-alertas"><div class="loading">Cargando...</div></div></div>
           <div class="d-card"><div class="d-card-title" style="display:flex;justify-content:space-between;align-items:center">Cuadros <button class="btn-add" onclick="abrirModalCuadro()">+ Nuevo</button></div><div id="d-cuadros"><div class="loading">Cargando...</div></div></div>
         </div>
-        <div class="d-card" style="margin-top:20px"><div class="d-card-title">Animales por categoría</div><div id="d-categorias"><div class="loading">Cargando...</div></div></div>
       </div>
 
       <div id="d-screen-animales" class="d-screen">
@@ -717,29 +717,83 @@ function abrirModalParicion(madreId){
       <div class="form-group"><label class="form-label">Fecha parto</label><input class="form-input" type="date" id="mod-fecha" value="${hoy}"></div>
       <div class="form-group"><label class="form-label">Resultado</label><select class="form-input" id="mod-resultado"><option value="vivo">Vivo</option><option value="muerto">Muerto</option><option value="gemelar">Gemelar</option></select></div>
     </div>
-    <div class="form-group"><label class="form-label">Cría (opcional — animal ya registrado)</label><select class="form-input" id="mod-cria"><option value="">No vinculada</option>${allAnimales.map(a=>`<option value="${a.id}">${a.caravana_senasa}</option>`).join('')}</select></div>
+    
+    <div style="border-top:1px solid var(--border);margin:18px 0 14px;padding-top:14px">
+      <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:10px">Cría</div>
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <button class="tab-btn active" id="btn-cria-nueva" onclick="toggleCriaMode('nueva')" style="flex:1;cursor:pointer">Registrar cría nueva</button>
+        <button class="tab-btn" id="btn-cria-existente" onclick="toggleCriaMode('existente')" style="flex:1;cursor:pointer">Vincular existente</button>
+        <button class="tab-btn" id="btn-cria-sin" onclick="toggleCriaMode('sin')" style="flex:1;cursor:pointer">Sin cría</button>
+      </div>
+      
+      <div id="cria-nueva-form">
+        <div class="form-group"><label class="form-label">Caravana de la cría</label><input class="form-input" type="text" id="mod-cria-caravana" placeholder="AR000000000" style="font-family:var(--font-mono)"></div>
+        <div class="row2">
+          <div class="form-group"><label class="form-label">Sexo</label><select class="form-input" id="mod-cria-sexo"><option value="hembra">Hembra</option><option value="macho">Macho</option></select></div>
+          <div class="form-group"><label class="form-label">Peso al nacer (kg)</label><input class="form-input" type="number" step="0.1" id="mod-cria-peso" placeholder="34"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Raza</label><input class="form-input" type="text" id="mod-cria-raza" placeholder="Hereford"></div>
+      </div>
+      
+      <div id="cria-existente-form" style="display:none">
+        <div class="form-group"><label class="form-label">Seleccionar animal ya registrado</label><select class="form-input" id="mod-cria-existente"><option value="">Seleccionar...</option>${allAnimales.map(a=>`<option value="${a.id}">${a.caravana_senasa}</option>`).join('')}</select></div>
+      </div>
+    </div>
+    
     <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-input" id="mod-obs"></textarea></div>
-    <button class="btn btn-primary" onclick="guardarParicion()">Guardar</button>
+    <button class="btn btn-primary" onclick="guardarParicion()">Guardar parición</button>
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <div id="mod-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
   `);
+}
+
+let criaMode='nueva';
+function toggleCriaMode(m){
+  criaMode=m;
+  document.getElementById('btn-cria-nueva').classList.toggle('active',m==='nueva');
+  document.getElementById('btn-cria-existente').classList.toggle('active',m==='existente');
+  document.getElementById('btn-cria-sin').classList.toggle('active',m==='sin');
+  document.getElementById('cria-nueva-form').style.display=m==='nueva'?'block':'none';
+  document.getElementById('cria-existente-form').style.display=m==='existente'?'block':'none';
 }
 
 async function guardarParicion(){
   const msg=document.getElementById('mod-msg');
   const madre_id=document.getElementById('mod-madre').value;
   const fecha_parto=document.getElementById('mod-fecha').value;
+  const resultado=document.getElementById('mod-resultado').value;
   if(!madre_id||!fecha_parto){msg.textContent='Madre y fecha son obligatorios';msg.className='msg-err';return;}
+  
+  let cria_id=null;
+  
+  if(criaMode==='nueva'&&resultado!=='muerto'){
+    const caravana=document.getElementById('mod-cria-caravana').value.trim();
+    if(!caravana){msg.textContent='Cargá la caravana de la cría (o cambiá a "Sin cría")';msg.className='msg-err';return;}
+    const madre=allAnimales.find(a=>a.id===madre_id);
+    const{data:nuevaCria,error:errCria}=await sb.from('animales').insert({
+      caravana_senasa:caravana,
+      sexo:document.getElementById('mod-cria-sexo').value,
+      raza:document.getElementById('mod-cria-raza').value||madre?.raza||null,
+      fecha_nacimiento:fecha_parto,
+      peso_nacimiento:parseFloat(document.getElementById('mod-cria-peso').value)||null,
+      madre_id:madre_id,
+      cuadro_id:madre?.cuadro_id||null,
+      estado:'activo'
+    }).select().single();
+    if(errCria){msg.textContent='Error al crear cría: '+errCria.message;msg.className='msg-err';return;}
+    cria_id=nuevaCria.id;
+  } else if(criaMode==='existente'){
+    cria_id=document.getElementById('mod-cria-existente').value||null;
+  }
+  
   const{error}=await sb.from('pariciones').insert({
-    madre_id,fecha_parto,
-    cria_id:document.getElementById('mod-cria').value||null,
-    resultado:document.getElementById('mod-resultado').value,
+    madre_id,fecha_parto,cria_id,resultado,
     observaciones:document.getElementById('mod-obs').value||null
   });
   if(error){msg.textContent='Error: '+error.message;msg.className='msg-err';return;}
-  msg.textContent='Parición guardada';msg.className='msg-ok';
+  msg.textContent=cria_id?'Parición y cría guardadas':'Parición guardada';msg.className='msg-ok';
   await loadAll();
-  setTimeout(closeModal,800);
+  setTimeout(closeModal,1000);
 }
 
 function abrirModalEditarParicion(id){
