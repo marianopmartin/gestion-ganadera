@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.marianopmartin.twa",
+        "sha256_cert_fingerprints": ["8D:21:21:14:07:E4:32:96:96:EC:09:62:C6:5B:FE:C4:2B:58:96:07:D8:3E:EE:62:7A:CD:9C:4A:26:7D:2C:11"]
+      }
+    }]
