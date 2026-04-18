@@ -222,8 +222,8 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
       <div class="nav-tabs">
         <button class="tab-btn active" onclick="mFiltrarSanidad('todos',this)">Todos</button>
         <button class="tab-btn" onclick="mFiltrarSanidad('brucelosis',this)">Brucelosis</button>
-        <button class="tab-btn" onclick="mFiltrarSanidad('sauaipe',this)">Saguaype</button>
-        <button class="tab-btn" onclick="mFiltrarSanidad('antipulgas',this)">Antiparasitario ext.</button>
+        <button class="tab-btn" onclick="mFiltrarSanidad('saguaype',this)">Saguaype</button>
+        <button class="tab-btn" onclick="mFiltrarSanidad('antiparasitario_externo',this)">Antiparasitario ext.</button>
       </div>
       <div class="section"><div id="m-sanidad-alertas"></div><div class="section-title">Registros</div><div id="m-sanidad-list"><div class="loading">Cargando...</div></div></div>
     </div>
@@ -325,7 +325,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
 
       <div id="d-screen-sanidad" class="d-screen">
         <div style="display:flex;gap:8px;margin-bottom:20px;align-items:center">
-          <select class="form-input" id="d-filtro-sanidad" onchange="dRenderSanidad()" style="max-width:200px"><option value="todos">Todos los tipos</option><option value="brucelosis">Brucelosis</option><option value="sauaipe">Saguaype</option><option value="antipulgas">Antiparasitario externo</option><option value="vacuna">Vacuna</option></select>
+          <select class="form-input" id="d-filtro-sanidad" onchange="dRenderSanidad()" style="max-width:200px"><option value="todos">Todos los tipos</option><option value="brucelosis">Brucelosis</option><option value="saguaype">Saguaype</option><option value="antiparasitario_externo">Antiparasitario externo</option><option value="vacuna">Vacuna</option></select>
           <button class="btn btn-primary btn-sm" onclick="abrirModalSanidad()">+ Registrar sanidad</button>
         </div>
         <div id="d-sanidad-alertas" style="margin-bottom:16px"></div>
@@ -608,7 +608,7 @@ const categoriaBadge=(animal)=>{
   return `<span class="badge ${colores[c]||'bb'}">${c}</span>`;
 };
 const badgeSan=v=>{if(!v)return'<span class="badge bb">OK</span>';const d=Math.ceil((new Date(v)-new Date())/86400000);return d<0?'<span class="badge br">Vencido</span>':d<=30?'<span class="badge br">Por vencer</span>':'<span class="badge bg">Vigente</span>';};
-const labelTipo=(t)=>{const m={brucelosis:'Brucelosis',sauaipe:'Saguaype',antipulgas:'Antiparasitario externo',vacuna:'Vacuna',otro:'Otro'};return m[t]||(t?t.charAt(0).toUpperCase()+t.slice(1):'—');};
+const labelTipo=(t)=>{const m={brucelosis:'Brucelosis',saguaype:'Saguaype',antiparasitario_externo:'Antiparasitario externo',sauaipe:'Saguaype',antipulgas:'Antiparasitario externo',vacuna:'Vacuna',otro:'Otro'};return m[t]||(t?t.charAt(0).toUpperCase()+t.slice(1):'—');};
 
 async function loadAll(){
   if (isOnline) await fullSync();
@@ -802,8 +802,8 @@ async function verAnimal(id,ctx){
   <div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Sanidad <button class="btn-add" onclick="abrirModalSanidad('${a.id}')">+ Nuevo</button></div>
     <div class="detail-row"><span class="detail-key">Brucelosis</span>${bruc?badgeSan(bruc.fecha_vencimiento):'<span class="badge ba">Sin registro</span>'}</div>
     ${bruc?`<div class="detail-row"><span class="detail-key">Vence</span><span class="detail-val">${bruc.fecha_vencimiento}</span></div>`:''}
-    <div class="detail-row"><span class="detail-key">Saguaype</span>${san?.find(s=>s.tipo==='sauaipe')?'<span class="badge bg">OK</span>':'<span class="badge ba">Pendiente</span>'}</div>
-    <div class="detail-row"><span class="detail-key">Antiparasitario ext.</span>${san?.find(s=>s.tipo==='antipulgas')?'<span class="badge bg">OK</span>':'<span class="badge ba">Pendiente</span>'}</div>
+    <div class="detail-row"><span class="detail-key">Saguaype</span>${san?.find(s=>s.tipo==='saguaype')?'<span class="badge bg">OK</span>':'<span class="badge ba">Pendiente</span>'}</div>
+    <div class="detail-row"><span class="detail-key">Antiparasitario ext.</span>${san?.find(s=>s.tipo==='antiparasitario_externo')?'<span class="badge bg">OK</span>':'<span class="badge ba">Pendiente</span>'}</div>
   </div>
   ${a.sexo==='hembra'?`<div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Pariciones <button class="btn-add" onclick="abrirModalParicion('${a.id}')">+ Nuevo</button></div>${parh}</div>`:''}
   <button class="btn btn-secondary" onclick="${ctx==='m'?`mShowScreen('${mPrevScreen}')`:`dShowScreen('animales')`}" style="margin-top:4px">← Volver</button>`;
@@ -904,7 +904,7 @@ function abrirModalSanidad(animalId){
     <div class="modal-title">Registrar sanidad</div>
     <div class="form-group"><label class="form-label">Animal</label><select class="form-input" id="mod-animal"><option value="">Seleccionar...</option>${opcionesAnimales(animalId)}</select></div>
     <div class="row2">
-      <div class="form-group"><label class="form-label">Tipo</label><select class="form-input" id="mod-tipo"><option value="">Seleccionar...</option><option value="brucelosis">Brucelosis</option><option value="sauaipe">Saguaype</option><option value="antipulgas">Antiparasitario externo</option><option value="vacuna">Vacuna</option><option value="otro">Otro</option></select></div>
+      <div class="form-group"><label class="form-label">Tipo</label><select class="form-input" id="mod-tipo"><option value="">Seleccionar...</option><option value="brucelosis">Brucelosis</option><option value="saguaype">Saguaype</option><option value="antiparasitario_externo">Antiparasitario externo</option><option value="vacuna">Vacuna</option><option value="otro">Otro</option></select></div>
       <div class="form-group"><label class="form-label">Fecha</label><input class="form-input" type="date" id="mod-fecha" value="${hoy}"></div>
     </div>
     <div class="form-group"><label class="form-label">Producto</label><input class="form-input" type="text" id="mod-producto" placeholder="Nombre del producto"></div>
