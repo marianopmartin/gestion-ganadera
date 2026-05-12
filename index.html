@@ -242,6 +242,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
         <div class="form-group"><label class="form-label">Fecha de nacimiento</label><input class="form-input" type="date" id="m-new-fecha"></div>
         <div class="form-group"><label class="form-label">Peso al nacer (kg)</label><input class="form-input" type="number" id="m-new-peso" placeholder="0"></div>
         <div class="form-group"><label class="form-label">Cuadro</label><select class="form-input" id="m-new-cuadro"><option value="">Sin asignar</option></select></div>
+        <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-input" id="m-new-observaciones" placeholder="Notas, antecedentes, observaciones..."></textarea></div>
         <button class="btn btn-primary" onclick="guardarAnimal('m')">Guardar animal</button>
         <button class="btn btn-secondary" onclick="mShowScreen('animales')">Cancelar</button>
         <div id="m-nuevo-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
@@ -386,6 +387,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
               <div class="form-group"><label class="form-label">Peso al nacer (kg)</label><input class="form-input" type="number" id="d-new-peso" placeholder="0"></div>
             </div>
             <div class="form-group"><label class="form-label">Cuadro</label><select class="form-input" id="d-new-cuadro"><option value="">Sin asignar</option></select></div>
+            <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-input" id="d-new-observaciones" placeholder="Notas, antecedentes, observaciones..."></textarea></div>
             <button class="btn btn-primary" onclick="guardarAnimal('d')" style="margin-top:4px">Guardar animal</button>
             <div id="d-nuevo-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
           </div>
@@ -800,6 +802,7 @@ async function verAnimal(id,ctx){
     <div class="detail-row"><span class="detail-key">Último peso</span><span class="detail-val">${ps?.[0]?.peso_kg||'—'} kg</span></div>
     <div class="detail-row"><span class="detail-key">Estado</span><span class="detail-val">${a.estado}</span></div>
   </div>
+  ${a.observaciones?`<div class="card"><div class="card-title">Observaciones</div><div style="font-size:13px;color:var(--text);white-space:pre-wrap;line-height:1.5">${a.observaciones}</div></div>`:''}
   <div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Pesajes <button class="btn-add" onclick="abrirModalPesaje('${a.id}')">+ Nuevo</button></div>${phm}</div>
   <div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">Sanidad <button class="btn-add" onclick="abrirModalSanidad('${a.id}')">+ Nuevo</button></div>
     <div class="detail-row"><span class="detail-key">Brucelosis</span>${bruc?badgeSan(bruc.fecha_vencimiento):'<span class="badge ba">Sin registro</span>'}</div>
@@ -829,7 +832,7 @@ async function guardarAnimal(ctx){
   const msg=document.getElementById(ctx+'-nuevo-msg');
   if(!caravana||!sexo){msg.textContent='Caravana y sexo son obligatorios';msg.className='msg-err';return;}
   try {
-    await dbInsert('animales', {caravana_senasa:caravana,sexo,raza:g('raza')||null,fecha_nacimiento:g('fecha')||null,peso_nacimiento:g('peso')?parseFloat(g('peso')):null,cuadro_id:g('cuadro')||null,estado:'activo'});
+    await dbInsert('animales', {caravana_senasa:caravana,sexo,raza:g('raza')||null,fecha_nacimiento:g('fecha')||null,peso_nacimiento:g('peso')?parseFloat(g('peso')):null,cuadro_id:g('cuadro')||null,observaciones:g('observaciones')||null,estado:'activo'});
     msg.textContent=isOnline?'Animal guardado':'Animal guardado (offline — se sincroniza al reconectar)';msg.className='msg-ok';
     await loadAll();
     setTimeout(()=>ctx==='m'?mShowScreen('animales'):dShowScreen('animales'),1000);
@@ -1131,6 +1134,7 @@ function abrirModalEditarAnimal(id){
     <div class="form-group"><label class="form-label">Cuadro</label><select class="form-input" id="mod-cuadro"><option value="">Sin asignar</option>${allCuadros.map(c=>`<option value="${c.id}" ${a.cuadro_id===c.id?'selected':''}>${c.nombre}</option>`).join('')}</select></div>
     <div class="form-group"><label class="form-label">Categoría especial (machos)</label><select class="form-input" id="mod-cat"><option value="">Automática por edad</option><option value="toro" ${a.categoria_manual==='toro'?'selected':''}>Toro (reproductor)</option></select><div style="font-size:11px;color:var(--text3);margin-top:4px">Por defecto, los machos > 18 meses se consideran novillos. Marcá "Toro" si es reproductor.</div></div>
     <div class="form-group"><label class="form-label">Estado</label><select class="form-input" id="mod-estado"><option value="activo" ${a.estado==='activo'?'selected':''}>Activo</option><option value="vendido" ${a.estado==='vendido'?'selected':''}>Vendido</option><option value="muerto" ${a.estado==='muerto'?'selected':''}>Muerto</option></select></div>
+    <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-input" id="mod-observaciones" placeholder="Notas, antecedentes, observaciones...">${a.observaciones||''}</textarea></div>
     <button class="btn btn-primary" onclick="guardarEdicionAnimal('${id}')">Guardar cambios</button>
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <div id="mod-msg" style="margin-top:10px;font-size:13px;text-align:center"></div>
@@ -1149,7 +1153,8 @@ async function guardarEdicionAnimal(id){
       fecha_nacimiento:document.getElementById('mod-fecha').value||null,
       cuadro_id:document.getElementById('mod-cuadro').value||null,
       categoria_manual:document.getElementById('mod-cat').value||null,
-      estado:document.getElementById('mod-estado').value
+      estado:document.getElementById('mod-estado').value,
+      observaciones:document.getElementById('mod-observaciones').value||null
     });
     msg.textContent=isOnline?'Cambios guardados':'Guardado (offline)';msg.className='msg-ok';
     await loadAll();
