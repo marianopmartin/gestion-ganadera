@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const CACHE_NAME = `campo-ganadero-${CACHE_VERSION}`;
 
 const ASSETS = [
@@ -6,7 +6,9 @@ const ASSETS = [
   './index.html',
   'https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-  'https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js'
+  'https://cdn.jsdelivr.net/npm/dexie@3.2.4/dist/dexie.min.js',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
 ];
 
 self.addEventListener('install', (e) => {
@@ -27,11 +29,11 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-  
+
   if (url.hostname.includes('supabase.co')) {
     return;
   }
-  
+
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;

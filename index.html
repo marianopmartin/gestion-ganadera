@@ -12,6 +12,8 @@
 <title>Estancia Cancahuel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root {
   --bg:#0f0f0f;--bg2:#181818;--bg3:#222222;
@@ -41,7 +43,7 @@ input,select,textarea{font-family:var(--font);font-size:14px;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .pending-badge{background:var(--amber-bg);color:var(--amber);font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px;font-weight:500;}
 .m-content{flex:1;overflow-y:auto;padding-bottom:80px;}
-.bottom-bar{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-top:1px solid var(--border);padding:8px 0 20px;z-index:10;}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(5,1fr);background:var(--bg);border-top:1px solid var(--border);padding:8px 0 20px;z-index:10;}
 .bar-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;}
 .bar-icon{font-size:20px;line-height:1;}
 .bar-label{font-size:9px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;}
@@ -162,6 +164,15 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
 .empty{text-align:center;padding:20px;color:var(--text3);font-size:13px;}
 .header-action{font-size:13px;color:var(--accent);}
 .mono{font-family:var(--font-mono);font-size:12px;}
+.leaflet-container{background:#0a0a0a!important;font-family:var(--font)!important;}
+.leaflet-popup-content-wrapper{background:var(--bg2)!important;color:var(--text)!important;border:1px solid var(--border2)!important;border-radius:var(--radius)!important;}
+.leaflet-popup-tip{background:var(--bg2)!important;}
+.leaflet-popup-content{margin:12px 14px!important;font-size:13px!important;}
+.leaflet-popup-close-button{color:var(--text2)!important;}
+.leaflet-tooltip{background:var(--bg2)!important;color:var(--text)!important;border:1px solid var(--border2)!important;font-family:var(--font)!important;}
+.leaflet-tooltip-top:before{border-top-color:var(--border2)!important;}
+.cuadro-label{background:rgba(15,15,15,0.75);color:var(--text);padding:3px 7px;border-radius:4px;font-size:11px;font-weight:500;border:none!important;box-shadow:none!important;}
+.cuadro-label:before{display:none!important;}
 .msg-ok{color:var(--green);}
 .msg-err{color:var(--red);}
 .modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;}
@@ -234,6 +245,10 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
       <div class="section"><div id="m-sanidad-alertas"></div><div class="section-title">Registros</div><div id="m-sanidad-list"><div class="loading">Cargando...</div></div></div>
     </div>
     <div id="m-screen-detalle" class="screen"><div class="section" style="padding-top:16px"><div id="m-detalle-content"><div class="loading">Cargando...</div></div></div></div>
+    <div id="m-screen-mapa" class="screen">
+      <div style="padding:12px 16px 0"><div style="font-size:11px;color:var(--text2);margin-bottom:8px">Tocá un cuadro para ver cuántos animales tiene</div></div>
+      <div id="m-mapa-container" style="height:calc(100vh - 220px);width:100%;background:var(--bg2);border-radius:0"></div>
+    </div>
     <div id="m-screen-nuevo-animal" class="screen">
       <div class="section" style="padding-top:16px">
         <div class="form-group"><label class="form-label">Caravana SENASA</label><input class="form-input" type="text" id="m-new-caravana" placeholder="AR000000000" style="font-family:var(--font-mono)"></div>
@@ -254,6 +269,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
     <button class="bar-btn" id="m-bar-animales" onclick="mShowScreen('animales')"><span class="bar-icon">♦</span><span class="bar-label">Animales</span></button>
     <button class="bar-btn" id="m-bar-lector" onclick="mShowScreen('lector')"><span class="bar-icon">◉</span><span class="bar-label">Lector</span></button>
     <button class="bar-btn" id="m-bar-sanidad" onclick="mShowScreen('sanidad')"><span class="bar-icon">✚</span><span class="bar-label">Sanidad</span></button>
+    <button class="bar-btn" id="m-bar-mapa" onclick="mShowScreen('mapa')"><span class="bar-icon">◆</span><span class="bar-label">Mapa</span></button>
   </div>
 </div>
 
@@ -265,6 +281,7 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
       <button class="nav-item active" id="d-nav-dashboard" onclick="dShowScreen('dashboard')"><span class="nav-icon">⌂</span>Dashboard</button>
       <button class="nav-item" id="d-nav-animales" onclick="dShowScreen('animales')"><span class="nav-icon">♦</span>Animales</button>
       <button class="nav-item" id="d-nav-cuadros" onclick="dShowScreen('cuadros')"><span class="nav-icon">▦</span>Cuadros</button>
+      <button class="nav-item" id="d-nav-mapa" onclick="dShowScreen('mapa')"><span class="nav-icon">◆</span>Mapa</button>
       <button class="nav-item" id="d-nav-lector" onclick="dShowScreen('lector')"><span class="nav-icon">◉</span>Lector BLE</button>      <div class="nav-group">Gestión</div>
       <button class="nav-item" id="d-nav-sanidad" onclick="dShowScreen('sanidad')"><span class="nav-icon">✚</span>Sanidad</button>
       <button class="nav-item" id="d-nav-pesajes" onclick="dShowScreen('pesajes')"><span class="nav-icon">⚖</span>Pesajes</button>
@@ -372,6 +389,11 @@ textarea.form-input{resize:vertical;min-height:60px;font-family:var(--font);}
       </div>
 
       <div id="d-screen-detalle" class="d-screen"><div id="d-detalle-content"><div class="loading">Cargando...</div></div></div>
+
+      <div id="d-screen-mapa" class="d-screen">
+        <div id="d-mapa-container" style="height:calc(100vh - 140px);width:100%;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)"></div>
+      </div>
+
 
       <div id="d-screen-nuevo-animal" class="d-screen">
         <div style="max-width:540px">
@@ -593,6 +615,7 @@ async function dbDelete(table, id) {
 }
 
 let allAnimales=[],allSanidad=[],allPariciones=[],allCuadros=[],allPesajes=[],allServicios=[];
+let mapaM=null, mapaD=null, mapaMLayer=null, mapaDLayer=null;
 let mFiltroAnimal='todos',mFiltroSanidad='todos',mPrevScreen='dashboard';
 
 const calcEdadMeses=f=>{if(!f)return null;const d=new Date(f),h=new Date();return (h.getFullYear()-d.getFullYear())*12+h.getMonth()-d.getMonth();};
@@ -1225,16 +1248,100 @@ async function guardarAsignacion(){
   } catch(e) { msg.textContent='Error: '+e.message; msg.className='msg-err'; }
 }
 
+function colorCuadro(cantidad){
+  if(cantidad===0) return '#555';
+  if(cantidad<20) return '#60a5fa';
+  if(cantidad<50) return '#4ade80';
+  if(cantidad<100) return '#fbbf24';
+  return '#f87171';
+}
+
+function inicializarMapa(ctx){
+  const containerId = ctx==='m' ? 'm-mapa-container' : 'd-mapa-container';
+  const container = document.getElementById(containerId);
+  if(!container) return;
+
+  // Destruir mapa anterior si existe
+  if(ctx==='m' && mapaM){ mapaM.remove(); mapaM=null; }
+  if(ctx==='d' && mapaD){ mapaD.remove(); mapaD=null; }
+
+  // Crear mapa centrado en Patagonia (Chubut)
+  const mapa = L.map(containerId, {
+    center: [-42.40, -69.05],
+    zoom: 12,
+    zoomControl: true,
+    attributionControl: false
+  });
+
+  // Capa satelital de Esri (gratis, sin API key)
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19
+  }).addTo(mapa);
+
+  // Agregar cada cuadro con polígono
+  const bounds = [];
+  const cuadrosConGeo = allCuadros.filter(c => c.geojson);
+
+  cuadrosConGeo.forEach(c => {
+    try {
+      const geo = typeof c.geojson === 'string' ? JSON.parse(c.geojson) : c.geojson;
+      // GeoJSON usa [lon,lat], Leaflet usa [lat,lon] - invertir
+      const coords = geo.coordinates[0].map(p => [p[1], p[0]]);
+
+      const cantidad = allAnimales.filter(a => a.cuadro_id === c.id).length;
+      const color = colorCuadro(cantidad);
+
+      const polygon = L.polygon(coords, {
+        color: color,
+        weight: 2,
+        fillColor: color,
+        fillOpacity: 0.25,
+        className: 'cuadro-polygon'
+      }).addTo(mapa);
+
+      // Popup al hacer click
+      polygon.bindPopup(`
+        <div style="min-width:160px">
+          <div style="font-weight:500;margin-bottom:6px;font-size:14px">${c.nombre}</div>
+          <div style="font-size:12px;color:var(--text2)">${c.hectareas||'—'} ha</div>
+          <div style="font-size:22px;font-weight:300;margin-top:8px;color:${color}">${cantidad}</div>
+          <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">animales</div>
+        </div>
+      `);
+
+      // Tooltip permanente con nombre
+      polygon.bindTooltip(c.nombre, {
+        permanent: true,
+        direction: 'center',
+        className: 'cuadro-label'
+      });
+
+      coords.forEach(c => bounds.push(c));
+    } catch(e) {
+      console.log('Error renderizando cuadro:', c.nombre, e);
+    }
+  });
+
+  // Ajustar vista a los cuadros
+  if(bounds.length > 0) {
+    mapa.fitBounds(bounds, { padding: [20, 20] });
+  }
+
+  if(ctx==='m') mapaM = mapa;
+  else mapaD = mapa;
+}
+
 function mShowScreen(id){
   document.querySelectorAll('.mobile-app .screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('m-screen-'+id)?.classList.add('active');
   document.querySelectorAll('.bar-btn').forEach(b=>b.classList.remove('active'));
-  const bar={dashboard:'m-bar-dashboard',animales:'m-bar-animales',lector:'m-bar-lector',sanidad:'m-bar-sanidad'};
+  const bar={dashboard:'m-bar-dashboard',animales:'m-bar-animales',lector:'m-bar-lector',sanidad:'m-bar-sanidad',mapa:'m-bar-mapa'};
   if(bar[id])document.getElementById(bar[id])?.classList.add('active');
-  const t={dashboard:'Estancia Cancahuel',animales:'Animales',lector:'Lector BLE',sanidad:'Sanidad',detalle:'Ficha animal','nuevo-animal':'Nuevo animal'};
+  const t={dashboard:'Estancia Cancahuel',animales:'Animales',lector:'Lector BLE',sanidad:'Sanidad',mapa:'Mapa del campo',detalle:'Ficha animal','nuevo-animal':'Nuevo animal'};
   document.getElementById('m-topbar-title').textContent=t[id]||'';
   document.getElementById('m-topbar-action').innerHTML=id==='animales'?'<button class="header-action" onclick="mShowScreen(\'nuevo-animal\')">+ Nuevo</button>':'';
   if(id==='lector'){const i=document.getElementById('m-caravana-input');if(i){i.value='';document.getElementById('m-lector-resultado').innerHTML='';setTimeout(()=>i.focus(),150);}}
+  if(id==='mapa'){setTimeout(()=>inicializarMapa('m'),100);}
 }
 
 function dShowScreen(id){
@@ -1242,8 +1349,8 @@ function dShowScreen(id){
   document.getElementById('d-screen-'+id)?.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('d-nav-'+id)?.classList.add('active');
-  const t={dashboard:'Dashboard',animales:'Animales',cuadros:'Cuadros',lector:'Lector BLE',sanidad:'Sanidad',pesajes:'Pesajes',pariciones:'Pariciones',servicios:'Servicios',detalle:'Ficha animal','nuevo-animal':'Nuevo animal'};
-  const s={dashboard:'Resumen del campo',animales:'Todos los animales activos',cuadros:'Potreros del campo',lector:'Escaneá caravanas con el lector BLE',sanidad:'Registros sanitarios',pesajes:'Historial de pesajes',pariciones:'Historial de partos',servicios:'Entrada/salida del toro por cuadro','nuevo-animal':'Registrar un nuevo animal'};
+  const t={dashboard:'Dashboard',animales:'Animales',cuadros:'Cuadros',mapa:'Mapa del campo',lector:'Lector BLE',sanidad:'Sanidad',pesajes:'Pesajes',pariciones:'Pariciones',servicios:'Servicios',detalle:'Ficha animal','nuevo-animal':'Nuevo animal'};
+  const s={dashboard:'Resumen del campo',animales:'Todos los animales activos',cuadros:'Potreros del campo',mapa:'Vista satelital con los cuadros',lector:'Escaneá caravanas con el lector BLE',sanidad:'Registros sanitarios',pesajes:'Historial de pesajes',pariciones:'Historial de partos',servicios:'Entrada/salida del toro por cuadro','nuevo-animal':'Registrar un nuevo animal'};
   document.getElementById('d-topbar-title').textContent=t[id]||'';
   document.getElementById('d-topbar-sub').textContent=s[id]||'';
   if(id==='sanidad')dRenderSanidad();
@@ -1251,6 +1358,7 @@ function dShowScreen(id){
   if(id==='cuadros')dRenderCuadros();
   if(id==='pesajes')dRenderPesajes();
   if(id==='servicios')dRenderServicios();
+  if(id==='mapa'){setTimeout(()=>inicializarMapa('d'),100);}
   if(id==='lector'){const i=document.getElementById('d-caravana-input');if(i){i.value='';document.getElementById('d-lector-resultado').innerHTML='';setTimeout(()=>i.focus(),150);}}
 }
 
